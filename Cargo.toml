@@ -1,0 +1,4 @@
+[package]
+name = "tellstick_report"
+version = "0.1.0"
+authors = ["stian <baekkevold@gmail.com>"]

@@ -1,3 +1,22 @@
+mod main_test;
+mod telldus;
+
+extern crate libc;
+
+pub mod main {
+    pub fn retvalue() -> i32 {
+        return 2;
+    }
+}
+
+#[allow(dead_code)]
 fn main() {
-    println!("Hello, world!");
+    println!("Hello, world! {0}", main::retvalue());
+    println!("Telldus devices: {0}", telldus::get_number_of_devices());
+}
+
+
+#[test]
+fn test_retvalue() {
+    assert!(main::retvalue()==2);
 }

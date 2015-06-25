@@ -50,7 +50,7 @@ extern {
     fn tdGetProtocol(deviceId: c_int) -> *mut c_char;
     fn tdGetModel(deviceId: c_int) -> *mut c_char;
     fn tdSensor(protocol: *const c_char, protocolLen: c_int, model: *const c_char, modelLen: c_int, id: *mut c_int, dataTypes: *mut c_int) -> c_int;
-    fn tdSensorValue(protocol: *const c_char, model: *const c_char, id: c_int, dataType: c_int, value: *mut c_char, len: c_int, timestamp: *mut c_int) -> c_int;
+    fn tdSensorValue(protocol: *const c_char, model: *const c_char, id: c_int, dataType: c_int, value: *const c_char, len: c_int, timestamp: *mut c_int) -> c_int;
 }
 
 pub fn get_number_of_devices() -> i32 {
@@ -67,15 +67,25 @@ pub fn get_sensors() {
             let protocol = cchar_to_str(tdGetProtocol(id));
             let model = cchar_to_str(tdGetModel(id));
             println!("id: {} protocol: {} model: {}", id, protocol, model);
-            
-            //let cstring_protocol = CStr::new("            ").unwrap();
-            let str_capacity = 16;
+
+            let str_capacity: i32 = 16;
             let str_capacity_cint = str_capacity as c_int;
 
-            let empty_protocol = String::with_capacity(str_capacity);
+            let mut empty_value = String::with_capacity(str_capacity as usize);
+            let mut cstr_value = CString::new(empty_value.into_bytes()).unwrap().as_ptr();
+            let mut timestamp: i32 = 0;
+
+            let success = tdSensorValue(tdGetProtocol(id), tdGetModel(id), id, 1, cstr_value, str_capacity, &mut timestamp);
+            //let value = cchar_to_str(cstr_value);
+            //println!("value retrieved: {}", value);
+            println!("success={}",success);
+            
+            //let cstring_protocol = CStr::new("            ").unwrap();
+
+            let empty_protocol = String::with_capacity(str_capacity as usize);
             let cstr_protocol = CString::new(empty_protocol.into_bytes()).unwrap();
 
-            let empty_model = String::with_capacity(str_capacity);
+            let empty_model = String::with_capacity(str_capacity as usize);
             let cstr_model = CString::new(empty_model.into_bytes()).unwrap().as_ptr();
 
             //let mut id: i32 = 0;

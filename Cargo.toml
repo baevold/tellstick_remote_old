@@ -3,5 +3,5 @@ name = "tellstick_report"
 version = "0.1.0"
 authors = ["stian <baekkevold@gmail.com>"]
 
-[dependencies]
-libc = "0.1.8"
+#[dependencies]
+#libc = "0.1.8"

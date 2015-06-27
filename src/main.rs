@@ -12,7 +12,7 @@ pub mod main {
 #[allow(dead_code)]
 fn main() {
     println!("Hello, world! {0}", main::retvalue());
-    println!("Telldus devices: {0}", telldus::get_number_of_devices());
+    //telldus::get_devices();
     telldus::get_sensors();
 }
 

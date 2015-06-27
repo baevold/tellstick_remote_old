@@ -13,7 +13,10 @@ pub mod main {
 fn main() {
     println!("Hello, world! {0}", main::retvalue());
     //telldus::get_devices();
-    telldus::get_sensors();
+    let sensors = telldus::get_sensors();
+    for sensor in sensors {
+        println!("{}", sensor.to_string());
+    }
 }
 
 

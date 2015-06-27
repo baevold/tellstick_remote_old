@@ -63,12 +63,13 @@ pub struct Sensor {
     pub protocol: String,
     pub model: String,
     pub datatypes: i32,
-    pub temperature: f32
+    pub temperature: f32,
+    pub timestamp: i32
 }
 
 impl Sensor {
-    fn to_string(&self) -> String {
-        return format!("Sensor: protocol={} model={} id={} datatypes={} temperature={}",self.protocol, self.model, self.id, self.datatypes, self.temperature);
+    pub fn to_string(&self) -> String {
+        return format!("Sensor: protocol={} model={} id={} datatypes={} temperature={} timestamp={}",self.protocol, self.model, self.id, self.datatypes, self.temperature, self.timestamp);
     }
 }
 
@@ -90,58 +91,25 @@ extern {
     fn tdSensorValue(protocol: *const c_char, model: *const c_char, id: c_int, dataType: c_int, value: *const c_char, len: c_int, timestamp: *mut c_int) -> c_int;
 }
 
-/*
-pub fn get_sensors() -> Vec<Sensor> {
-    let sensors = get_sensor_structs();
-    for mut sensor in sensors {
-        let val_string = get_sensor_value(sensor.clone());
-        sensor.temperature = val_string.parse::<f32>().unwrap();
-        println!("{}", sensor.to_string());
-    }
-    return sensors();
-}
-*/
-
-fn get_sensor_value(sensor: Sensor) -> String {
-    unsafe {
-        let protocol_cstr = CString::new(sensor.protocol).unwrap();
-        let protocol_bytes = protocol_cstr.as_bytes_with_nul();
-        let model_cstr = CString::new(sensor.model).unwrap();
-        let model_bytes = model_cstr.as_bytes_with_nul();
-        let str_capacity = 20;
-        let mut timestamp = 0;
-        let value_cstr = CString::new(String::with_capacity(str_capacity as usize)).unwrap();
-        let value_bytes = value_cstr.as_bytes_with_nul();
-        let return_sensor_value = tdSensorValue(protocol_bytes.as_ptr() as *const i8, model_bytes.as_ptr() as *const i8, sensor.id, SENSORVALUE::TEMPERATURE as i32, value_bytes.as_ptr() as *const i8, str_capacity, &mut timestamp);
-        if return_sensor_value == ERRORCODE::SUCCESS as i32 {
-            return cchar_to_string(value_bytes.as_ptr() as *const i8);
-        } else {
-            return String::from_str("0.0");
-        }
-    }
-}
-
 pub fn get_sensors() -> Vec<Sensor> {
     let mut sensors = Vec::new();
     unsafe {
         let mut return_val: c_int = 0;
         while(return_val == ERRORCODE::SUCCESS as i32) {
             let str_capacity: i32 = 20;
-            let prot_cstr = CString::new(String::with_capacity(str_capacity as usize)).unwrap();
-            let prot_bytes = prot_cstr.as_bytes_with_nul();
-            let protocol_ptr = prot_bytes.as_ptr() as *const i8;
+            let protocol_cstr = CString::new(String::with_capacity(str_capacity as usize)).unwrap();
+            let protocol_bytes = protocol_cstr.as_bytes_with_nul();
             let model_cstr = CString::new(String::with_capacity(str_capacity as usize)).unwrap();
             let model_bytes = model_cstr.as_bytes_with_nul();
-            let model_ptr = model_bytes.as_ptr() as *const i8;
             
             let mut id: c_int = 0;
             let mut datatype: c_int = 0;
             
-            return_val = tdSensor(protocol_ptr, str_capacity, model_ptr, str_capacity, &mut id, &mut datatype);
+            return_val = tdSensor(protocol_bytes.as_ptr() as *const i8, str_capacity, model_bytes.as_ptr() as *const i8, str_capacity, &mut id, &mut datatype);
             
             if(return_val == ERRORCODE::SUCCESS as i32) {
-                let protocol = cchar_to_string(protocol_ptr).clone();
-                let model = cchar_to_string(model_ptr).clone();
+                let protocol = cchar_to_string(protocol_bytes.as_ptr() as *const i8).clone();
+                let model = cchar_to_string(model_bytes.as_ptr() as *const i8).clone();
                 let protocol_cstr = CString::new(protocol.clone()).unwrap();
                 let protocol_bytes = protocol_cstr.as_bytes_with_nul();
                 let model_cstr = CString::new(model.clone()).unwrap();
@@ -162,8 +130,9 @@ pub fn get_sensors() -> Vec<Sensor> {
                                              protocol: protocol.clone(),
                                              model: model.clone(),
                                              datatypes: datatype, 
-                                             temperature: temperature};
-                println!("{}", sensor.to_string());
+                                             temperature: temperature,
+                                             timestamp: timestamp};
+                //println!("{}", sensor.to_string());
 
                 sensors.push(sensor);
             }

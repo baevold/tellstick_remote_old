@@ -1,5 +1,5 @@
 {
-	"clients": {
-		"baekkevold.net"
-	}
+  "clients": [
+    "baekkevold.net:8876"
+  ]
 }

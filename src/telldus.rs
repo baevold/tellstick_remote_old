@@ -5,7 +5,6 @@ use std::ffi::CString;
 use std::string::String;
 use std::borrow::ToOwned;
 
-
 #[allow(dead_code)]
 enum DeviceMethod {
 	TurnOn = 1,
@@ -47,7 +46,7 @@ enum ErrorCode {
 	ErrorUnknown = -99
 }
 
-#[derive(Clone)]
+#[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Sensor {
 	pub id: i32,
 	pub protocol: String,
@@ -58,16 +57,25 @@ pub struct Sensor {
 }
 
 impl Sensor {
+	#[allow(dead_code)]
 	pub fn to_string(&self) -> String {
 		return format!("Sensor: protocol={} model={} id={} datatypes={} temperature={} timestamp={}",self.protocol, self.model, self.id, self.datatypes, self.temperature, self.timestamp);
 	}
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
+pub struct Status {
+	pub sensors: Vec<Sensor>,
+	pub devices: Vec<Device>
+}
+
+#[derive(RustcEncodable, RustcDecodable)]
 pub enum State {
 	On,
 	Off
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
 pub struct Device {
 	pub id: i32,
 	pub name: String,
@@ -83,6 +91,7 @@ impl Device {
 		return String::from(ret);
 	}
 
+	#[allow(dead_code)]
 	pub fn to_string(&self) -> String {
 		return format!("Device: id={} name={} state={}", self.id, self.name, self.state_to_string(&self.state));
 	}
@@ -122,7 +131,7 @@ pub fn close() {
 	}
 }
 
-pub fn get_sensors() -> Vec<Sensor> {
+fn get_sensors() -> Vec<Sensor> {
 	let mut sensors = Vec::new();
 	unsafe {
 		let mut return_val: c_int = 0;
@@ -181,7 +190,7 @@ fn map_state(value: i32) -> State {
 	}
 }
 
-pub fn get_devices() -> Vec<Device> {
+fn get_devices() -> Vec<Device> {
 	let mut devices = Vec::new();
 	unsafe {
 		let num_devices = tdGetNumberOfDevices();
@@ -219,6 +228,10 @@ pub fn get_devices() -> Vec<Device> {
 		}
 	}
 	return devices;
+}
+
+pub fn get_status() -> Status {
+	return Status{ sensors: get_sensors(), devices: get_devices() };
 }
 
 fn cchar_to_string(char_ptr: *const c_char) -> String {

@@ -1,15 +1,16 @@
 //#![feature(libc)]
-
 mod main_test;
 mod telldus;
+mod sender;
+mod receiver;
+mod config;
+
 extern crate libc;
 extern crate rustc_serialize;
+extern crate time;
 
-use std::fs::File;
-use std::io::prelude::*;
-use rustc_serialize::json::{self};
-
-static CONFIGFILE: &'static str = "cnf/report.json";
+use std::sync::mpsc::channel;
+use std::sync::mpsc::{Sender, Receiver};
 
 pub mod main {
 	pub fn retvalue() -> i32 {
@@ -24,42 +25,15 @@ pub struct Config {
 
 #[allow(dead_code)]
 fn main() {
-	telldus::init();
+	let config = config::read_config().unwrap();
+	//config::write_config();
 
-	let config = read_config();
-	//write_config();
+	let (tx, rx): (Sender<String>, Receiver<String>) = channel();
 
-	let sensors = telldus::get_sensors();
-	for sensor in sensors {
-		println!("{}", sensor.to_string());
-	}
-	let devices = telldus::get_devices();
-	for device in devices {
-		println!("{}", device.to_string());
-	}
-	telldus::close();
-}
-
-#[allow(dead_code)]
-fn write_config() {
-	let clients = [String::from("baekkevold.net:8876")];
-	let config = Config{ clients: clients.to_vec() };
-	let data: String = json::encode(&config).unwrap();
-	println!("use echo '[data]' > jq . to prettyfi");
-	println!("{}", data);
-}
-
-fn read_config() -> Option<Config> {
-	let mut file = match File::open(CONFIGFILE) {
-                Ok(file) => file,
-                Err(_) => panic!("no such file")
-        };
-        let mut json = String::new();
-        match file.read_to_string(&mut json) {
-                Ok(file) => file,
-                Err(_) => panic!("could not read file to string")
-        };
-	return Some(json::decode(&json).unwrap());
+	let recv_handle = receiver::start(tx);
+	let send_handle = sender::start(config.clients, rx);
+	recv_handle.join().unwrap();
+	send_handle.join().unwrap();
 }
 
 #[test]

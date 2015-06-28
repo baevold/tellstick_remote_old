@@ -19,9 +19,6 @@ pub struct Config {
 
 #[allow(dead_code)]
 fn main() {
-	let status = telldus::get_status();
-	println!("{}", status.to_string());
-	/*
 	let config = config::read_config().unwrap();
 	//config::write_config();
 
@@ -31,7 +28,6 @@ fn main() {
 	let send_handle = sender::start(config.clients, rx);
 	recv_handle.join().unwrap();
 	send_handle.join().unwrap();
-	*/
 }
 
 #[test]

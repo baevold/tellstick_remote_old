@@ -23,36 +23,6 @@ pub struct Status {
 	pub devices: Vec<Device>
 }
 
-
-impl ToString for Status {
-	#[allow(dead_code)]
-	fn to_string(&self) -> String {
-		fn sensors_to_string(vector: &Vec<Sensor>) -> String {
-			let mut tmp = String::from("[ ");
-			for v in vector {
-				tmp = format!("{} ", v.to_string());
-			}
-			tmp = format!("{}{}", tmp, String::from(" ]"));
-			return tmp;
-		}
-		fn devices_to_string(vector: &Vec<Device>) -> String {
-			let mut tmp = String::from("[ ");
-			for v in vector {
-				tmp = format!("{} ", v.to_string());
-			}
-			tmp = format!("{}{}", tmp, String::from(" ]"));
-			return tmp;
-		}
-		return format!("Status: {} {}", sensors_to_string(&self.sensors), devices_to_string(&self.devices));
-	}
-}
-
-#[derive(RustcEncodable, RustcDecodable)]
-pub enum State {
-	On,
-	Off
-}
-
 impl ToString for State {
 	fn to_string(&self) -> String {
 		let ret = match *self {
@@ -76,3 +46,33 @@ impl ToString for Device {
 		return format!("Device: id={} name={} state={}", self.id, self.name, self.state.to_string());
 	}
 }
+
+impl ToString for Status {
+	#[allow(dead_code)]
+	fn to_string(&self) -> String {
+		fn sensors_to_string(vector: &Vec<Sensor>) -> String {
+			let mut tmp = String::from("[");
+			for v in vector {
+				tmp = format!("{} {} ", tmp, v.to_string());
+			}
+			tmp = format!("{}]", tmp);
+			return tmp;
+		}
+		fn devices_to_string(vector: &Vec<Device>) -> String {
+			let mut tmp = String::from("[");
+			for v in vector {
+				tmp = format!("{} {} ", tmp, v.to_string());
+			}
+			tmp = format!("{}]", tmp);
+			return tmp;
+		}
+		return format!("Status: {} {}", sensors_to_string(&self.sensors), devices_to_string(&self.devices));
+	}
+}
+
+#[derive(RustcEncodable, RustcDecodable)]
+pub enum State {
+	On,
+	Off
+}
+

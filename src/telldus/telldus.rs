@@ -1,10 +1,11 @@
 use libc::{c_int, c_char};
 use std::str;
 use std::ffi::CStr;
-use std::ffi::CString;
 use std::string::String;
 use std::borrow::ToOwned;
 use telldus::types;
+
+const STR_CAPACITY: i32 = 20;
 
 #[allow(dead_code)]
 enum DeviceMethod {
@@ -86,30 +87,21 @@ fn get_sensors() -> Vec<types::Sensor> {
 	unsafe {
 		let mut return_val: c_int = 0;
 		while return_val == ErrorCode::Success as i32 {
-			let str_capacity: i32 = 20;
-			let protocol_cstr = CString::new(String::with_capacity(str_capacity as usize)).unwrap();
-			let protocol_bytes = protocol_cstr.as_bytes_with_nul();
-			let model_cstr = CString::new(String::with_capacity(str_capacity as usize)).unwrap();
-			let model_bytes = model_cstr.as_bytes_with_nul();
+			let protocol_bytes = [0; STR_CAPACITY as usize];
+			let model_bytes = [0; STR_CAPACITY as usize];
 			
 			let mut id: c_int = 0;
 			let mut datatype: c_int = 0;
 			
-			return_val = tdSensor(protocol_bytes.as_ptr() as *const i8, str_capacity, model_bytes.as_ptr() as *const i8, str_capacity, &mut id, &mut datatype);
-			
+			return_val = tdSensor(protocol_bytes.as_ptr() as *const i8, STR_CAPACITY, model_bytes.as_ptr() as *const i8, STR_CAPACITY, &mut id, &mut datatype);
+			let protocol = cchar_to_string(protocol_bytes.as_ptr() as *const i8).clone();
+			let model = cchar_to_string(model_bytes.as_ptr() as *const i8).clone();
+
 			if return_val == ErrorCode::Success as i32 {
-				let protocol = cchar_to_string(protocol_bytes.as_ptr() as *const i8).clone();
-				let model = cchar_to_string(model_bytes.as_ptr() as *const i8).clone();
-				let protocol_cstr = CString::new(protocol.clone()).unwrap();
-				let protocol_bytes = protocol_cstr.as_bytes_with_nul();
-				let model_cstr = CString::new(model.clone()).unwrap();
-				let model_bytes = model_cstr.as_bytes_with_nul();
-
 				let mut timestamp = 0;
-				let value_cstr = CString::new(String::with_capacity(str_capacity as usize)).unwrap();
-				let value_bytes = value_cstr.as_bytes_with_nul();
+				let value_bytes = [0; STR_CAPACITY as usize];
 
-				let return_sensor_value = tdSensorValue(protocol_bytes.as_ptr() as *const i8, model_bytes.as_ptr() as *const i8, id, SensorValue::Temperature as i32, value_bytes.as_ptr() as *const i8, str_capacity, &mut timestamp);
+				let return_sensor_value = tdSensorValue(protocol_bytes.as_ptr() as *const i8, model_bytes.as_ptr() as *const i8, id, SensorValue::Temperature as i32, value_bytes.as_ptr() as *const i8, STR_CAPACITY, &mut timestamp);
 
 				//skip devices which fail getting temperature
 				if return_sensor_value != ErrorCode::Success as i32 { continue; }
@@ -118,8 +110,8 @@ fn get_sensors() -> Vec<types::Sensor> {
 				let temperature = value_string.parse::<f32>().unwrap();
 
 				let sensor = types::Sensor {id: id,
-								protocol: protocol.clone(),
-								model: model.clone(),
+								protocol: protocol,
+								model: model,
 								datatypes: datatype, 
 								temperature: temperature,
 								timestamp: timestamp};
@@ -152,7 +144,12 @@ fn get_devices() -> Vec<types::Device> {
 			let methods = tdMethods(id, DeviceMethod::TurnOn as i32 | DeviceMethod::TurnOff as i32);
 			//ignore if not
 			if methods < ErrorCode::Success as i32 {
-				println!("Device with {} is not a turn on/off device. Skipping. Return code: {}", id, methods);
+				println!("Device with id {} is not a turn on/off device. Skipping. Method code: {}", id, methods);
+				continue;
+			}
+			//only allow on/off devices
+			if !is_on_off_device(methods) {
+				println!("Device with id {} is not a turn on/off device. Skipping. Method code: {}", id, methods);
 				continue;
 			}
 
@@ -167,10 +164,6 @@ fn get_devices() -> Vec<types::Device> {
 				println!("tdLastSentCommand failed. Returned value {}", lastsent);
 				continue;
 			}
-			//only allow on/off devices
-			if !(lastsent == DeviceMethod::TurnOn as i32 && lastsent == DeviceMethod::TurnOff as i32) {
-				continue;
-			}
 			let state = map_state(lastsent);
 			
 			let device = types::Device { id: id, name: name, state: state };
@@ -178,6 +171,12 @@ fn get_devices() -> Vec<types::Device> {
 		}
 	}
 	return devices;
+}
+
+fn is_on_off_device(methods: i32) -> bool {
+	let req = DeviceMethod::TurnOn as i32 | DeviceMethod::TurnOff as i32;
+	let mask = req & methods;
+	return mask != 0;
 }
 
 pub fn get_status() -> types::Status {

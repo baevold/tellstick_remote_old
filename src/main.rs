@@ -19,8 +19,8 @@ pub struct Config {
 
 #[allow(dead_code)]
 fn main() {
-	let config = config::read_config().unwrap();
 	//config::write_config();
+	let config = config::read_config().unwrap();
 
 	let (tx, rx): (Sender<String>, Receiver<String>) = channel();
 

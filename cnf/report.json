@@ -1,5 +1,6 @@
 {
   "clients": [
     "baekkevold.net:8876"
-  ]
+  ],
+  "receiver_port": 12
 }

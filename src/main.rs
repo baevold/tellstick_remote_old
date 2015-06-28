@@ -19,12 +19,14 @@ pub struct Config {
 
 #[allow(dead_code)]
 fn main() {
-	//config::write_config();
+	//uncomment to write new config. useful when changing the config signature
+	//config::write_config(); return;
+	
 	let config = config::read_config().unwrap();
 
 	let (tx, rx): (Sender<String>, Receiver<String>) = channel();
 
-	let recv_handle = receiver::start(tx);
+	let recv_handle = receiver::start(config.receiver_port, config.password, tx);
 	let send_handle = sender::start(config.clients, rx);
 	recv_handle.join().unwrap();
 	send_handle.join().unwrap();

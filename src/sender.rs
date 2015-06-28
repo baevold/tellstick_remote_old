@@ -46,6 +46,7 @@ fn send_status(status: telldus::types::Status, client: String) {
 	println!("Sending {}", data);
 	let buf = data.into_bytes();
 	socket.send_to(&buf, (ip, port)).unwrap();
+	drop(socket);
 }
 
 fn validate_message(msg: String) -> bool {

@@ -4,6 +4,7 @@ use std::ffi::CStr;
 use std::ffi::CString;
 use std::string::String;
 use std::borrow::ToOwned;
+use telldus::types;
 
 #[allow(dead_code)]
 enum DeviceMethod {
@@ -46,57 +47,6 @@ enum ErrorCode {
 	ErrorUnknown = -99
 }
 
-#[derive(RustcEncodable, RustcDecodable, Clone)]
-pub struct Sensor {
-	pub id: i32,
-	pub protocol: String,
-	pub model: String,
-	pub datatypes: i32,
-	pub temperature: f32,
-	pub timestamp: i32
-}
-
-impl Sensor {
-	#[allow(dead_code)]
-	pub fn to_string(&self) -> String {
-		return format!("Sensor: protocol={} model={} id={} datatypes={} temperature={} timestamp={}",self.protocol, self.model, self.id, self.datatypes, self.temperature, self.timestamp);
-	}
-}
-
-#[derive(RustcEncodable, RustcDecodable)]
-pub struct Status {
-	pub sensors: Vec<Sensor>,
-	pub devices: Vec<Device>
-}
-
-#[derive(RustcEncodable, RustcDecodable)]
-pub enum State {
-	On,
-	Off
-}
-
-#[derive(RustcEncodable, RustcDecodable)]
-pub struct Device {
-	pub id: i32,
-	pub name: String,
-	pub state: State
-}
-
-impl Device {
-	fn state_to_string(&self, state: &State) -> String {
-		let ret = match *state {
-			State::On  => "ON",
-			State::Off => "OFF"
-		};
-		return String::from(ret);
-	}
-
-	#[allow(dead_code)]
-	pub fn to_string(&self) -> String {
-		return format!("Device: id={} name={} state={}", self.id, self.name, self.state_to_string(&self.state));
-	}
-}
-
 #[link(name = "telldus-core")]
 #[allow(dead_code)]
 extern {
@@ -131,7 +81,7 @@ pub fn close() {
 	}
 }
 
-fn get_sensors() -> Vec<Sensor> {
+fn get_sensors() -> Vec<types::Sensor> {
 	let mut sensors = Vec::new();
 	unsafe {
 		let mut return_val: c_int = 0;
@@ -167,12 +117,12 @@ fn get_sensors() -> Vec<Sensor> {
 				let value_string = cchar_to_string(value_bytes.as_ptr() as *const i8);
 				let temperature = value_string.parse::<f32>().unwrap();
 
-				let sensor: Sensor = Sensor {id: id,
-											 protocol: protocol.clone(),
-											 model: model.clone(),
-											 datatypes: datatype, 
-											 temperature: temperature,
-											 timestamp: timestamp};
+				let sensor = types::Sensor {id: id,
+								protocol: protocol.clone(),
+								model: model.clone(),
+								datatypes: datatype, 
+								temperature: temperature,
+								timestamp: timestamp};
 				//println!("{}", sensor.to_string());
 
 				sensors.push(sensor);
@@ -182,15 +132,15 @@ fn get_sensors() -> Vec<Sensor> {
 	}
 }
 
-fn map_state(value: i32) -> State {
+fn map_state(value: i32) -> types::State {
 	if value == DeviceMethod::TurnOn as i32 {
-		return State::On;
+		return types::State::On;
 	} else {
-		return State::Off;
+		return types::State::Off;
 	}
 }
 
-fn get_devices() -> Vec<Device> {
+fn get_devices() -> Vec<types::Device> {
 	let mut devices = Vec::new();
 	unsafe {
 		let num_devices = tdGetNumberOfDevices();
@@ -202,7 +152,7 @@ fn get_devices() -> Vec<Device> {
 			let methods = tdMethods(id, DeviceMethod::TurnOn as i32 | DeviceMethod::TurnOff as i32);
 			//ignore if not
 			if methods < ErrorCode::Success as i32 {
-				println!("{}", methods);
+				println!("Device with {} is not a turn on/off device. Skipping. Return code: {}", id, methods);
 				continue;
 			}
 
@@ -223,15 +173,15 @@ fn get_devices() -> Vec<Device> {
 			}
 			let state = map_state(lastsent);
 			
-			let device = Device { id: id, name: name, state: state };
+			let device = types::Device { id: id, name: name, state: state };
 			devices.push(device);
 		}
 	}
 	return devices;
 }
 
-pub fn get_status() -> Status {
-	return Status{ sensors: get_sensors(), devices: get_devices() };
+pub fn get_status() -> types::Status {
+	return types::Status{ sensors: get_sensors(), devices: get_devices() };
 }
 
 fn cchar_to_string(char_ptr: *const c_char) -> String {

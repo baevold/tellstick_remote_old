@@ -30,14 +30,14 @@ fn start_sender(clients: Vec<String>, channel_receiver: Receiver<String>) {
 	}
 }
 
-fn get_status() -> telldus::Status {
+fn get_status() -> telldus::types::Status {
 	telldus::init();
 	let status = telldus::get_status();
 	telldus::close();
 	return status;
 }
 
-fn send_status(status: telldus::Status, client: String) {
+fn send_status(status: telldus::types::Status, client: String) {
 	let vec = client.split(":").collect::<Vec<&str>>();
 	let ip = vec[0];
 	let port = String::from(vec[1]).parse::<u16>().unwrap();

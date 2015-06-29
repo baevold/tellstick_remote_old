@@ -22,6 +22,8 @@ pub struct Config {
 fn main() {
 	//uncomment to write new config. useful when changing the config signature
 	//config::write_config(); return;
+	//uncomment to write an extmsg::Message to stdout
+	//extmsg::write_message(); return;
 	
 	let config = config::read_config().unwrap();
 

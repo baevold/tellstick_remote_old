@@ -82,6 +82,13 @@ pub fn close() {
 	}
 }
 
+pub fn switch(id: i32, newstate: types::State) {
+	match newstate {
+		types::State::On => unsafe { tdTurnOn(id); },
+		types::State::Off => unsafe { tdTurnOff(id); }
+	}
+}
+
 fn get_sensors() -> Vec<types::Sensor> {
 	let mut sensors = Vec::new();
 	unsafe {

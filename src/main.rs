@@ -4,6 +4,7 @@ mod telldus;
 mod sender;
 mod receiver;
 mod config;
+mod extmsg;
 
 extern crate libc;
 extern crate rustc_serialize;

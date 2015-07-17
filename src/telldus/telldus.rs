@@ -4,7 +4,7 @@ use std::ffi::CStr;
 use std::string::String;
 use std::borrow::ToOwned;
 use telldus::types;
-use extmsg;
+use common::extmsg;
 
 const STR_CAPACITY: i32 = 20;
 

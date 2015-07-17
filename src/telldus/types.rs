@@ -1,5 +1,5 @@
 use std::string::String;
-use extmsg;
+use common::extmsg;
 
 #[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Sensor {

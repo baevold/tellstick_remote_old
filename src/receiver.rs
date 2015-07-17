@@ -2,7 +2,7 @@ use std::thread;
 use std::sync::mpsc::Sender;
 use std::net::UdpSocket;
 use std::str;
-use extmsg;
+use common::extmsg;
 use telldus;
 
 const INTERVAL: u32 = 3000;

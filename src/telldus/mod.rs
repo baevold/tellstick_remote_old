@@ -1,6 +1,6 @@
 pub mod types;
 mod telldus;
-use extmsg;
+use common::extmsg;
 
 pub fn init() {
 	telldus::init();

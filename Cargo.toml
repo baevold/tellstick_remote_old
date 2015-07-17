@@ -1,7 +1,15 @@
 [package]
-name = "tellstick_report"
+name = "tellstick_remote"
 version = "0.1.0"
 authors = ["stian <baekkevold@gmail.com>"]
+
+[[bin]]
+name = "report"
+path = "src/report.rs"
+
+[[bin]]
+name = "websockethandler"
+path = "src/websocket_handler.rs"
 
 [dependencies]
 libc = "0.1.8"

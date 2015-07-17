@@ -1,5 +1,6 @@
 pub mod types;
 mod telldus;
+use extmsg;
 
 pub fn init() {
 	telldus::init();
@@ -13,6 +14,6 @@ pub fn get_status() -> types::Status {
 	return telldus::get_status();
 }
 
-pub fn switch(id: i32, newstate: types::State) {
+pub fn switch(id: i32, newstate: extmsg::State) {
 	telldus::switch(id, newstate);
 }

@@ -1,5 +1,5 @@
 //#![feature(libc)]
-mod main_test;
+mod report_test;
 mod telldus;
 mod sender;
 mod receiver;

@@ -1,4 +1,5 @@
 use std::string::String;
+use extmsg;
 
 #[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Sensor {
@@ -23,21 +24,11 @@ pub struct Status {
 	pub devices: Vec<Device>
 }
 
-impl ToString for State {
-	fn to_string(&self) -> String {
-		let ret = match *self {
-			State::On  => "ON",
-			State::Off => "OFF"
-		};
-		return String::from(ret);
-	}
-}
-
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Device {
 	pub id: i32,
 	pub name: String,
-	pub state: State
+	pub state: extmsg::State
 }
 
 impl ToString for Device {
@@ -70,9 +61,4 @@ impl ToString for Status {
 	}
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
-pub enum State {
-	On,
-	Off
-}
 

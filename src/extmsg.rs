@@ -1,11 +1,27 @@
 use rustc_serialize::json::{self};
 use std::str;
-use telldus;
+
+#[derive(RustcEncodable, RustcDecodable)]
+pub enum State {
+	On,
+	Off
+}
+
+impl ToString for State {
+	fn to_string(&self) -> String {
+		let ret = match *self {
+			State::On  => "ON",
+			State::Off => "OFF"
+		};
+		return String::from(ret);
+	}
+}
+
 
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct SwitchData {
 	pub id: i32,
-	pub state: telldus::types::State
+	pub state: State
 }
 
 #[derive(RustcEncodable, RustcDecodable)]
@@ -30,7 +46,7 @@ impl Message {
 pub fn write_message() {
 	let m = Message {
 			password: String::from("pwd"),
-			action: Action::Switch(SwitchData { id: 1, state: telldus::types::State::On }),
+			action: Action::Switch(SwitchData { id: 1, state: State::On }),
 	};
 	let data: String = json::encode(&m).unwrap();
         println!("use echo '[data]' > jq . to prettyfi. Remember to quites!");

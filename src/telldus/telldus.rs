@@ -4,6 +4,7 @@ use std::ffi::CStr;
 use std::string::String;
 use std::borrow::ToOwned;
 use telldus::types;
+use extmsg;
 
 const STR_CAPACITY: i32 = 20;
 
@@ -82,10 +83,10 @@ pub fn close() {
 	}
 }
 
-pub fn switch(id: i32, newstate: types::State) {
+pub fn switch(id: i32, newstate: extmsg::State) {
 	match newstate {
-		types::State::On => unsafe { tdTurnOn(id); },
-		types::State::Off => unsafe { tdTurnOff(id); }
+		extmsg::State::On => unsafe { tdTurnOn(id); },
+		extmsg::State::Off => unsafe { tdTurnOff(id); }
 	}
 }
 
@@ -131,11 +132,11 @@ fn get_sensors() -> Vec<types::Sensor> {
 	}
 }
 
-fn map_state(value: i32) -> types::State {
+fn map_state(value: i32) -> extmsg::State {
 	if value == DeviceMethod::TurnOn as i32 {
-		return types::State::On;
+		return extmsg::State::On;
 	} else {
-		return types::State::Off;
+		return extmsg::State::Off;
 	}
 }
 

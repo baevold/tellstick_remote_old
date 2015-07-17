@@ -4,6 +4,7 @@ use std::sync::mpsc::Receiver;
 use std::net::UdpSocket;
 use time;
 use rustc_serialize::json::{self};
+use common::telldus_types;
 
 static INTERVAL: u32 = 5000;
 
@@ -30,14 +31,14 @@ fn start_sender(clients: Vec<String>, channel_receiver: Receiver<String>) {
 	}
 }
 
-fn get_status() -> telldus::types::Status {
+fn get_status() -> telldus_types::Status {
 	telldus::init();
 	let status = telldus::get_status();
 	telldus::close();
 	return status;
 }
 
-fn send_status(status: telldus::types::Status, client: String) {
+fn send_status(status: telldus_types::Status, client: String) {
 	let vec = client.split(":").collect::<Vec<&str>>();
 	let ip = vec[0];
 	let port = String::from(vec[1]).parse::<u16>().unwrap();

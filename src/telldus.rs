@@ -3,7 +3,7 @@ use std::str;
 use std::ffi::CStr;
 use std::string::String;
 use std::borrow::ToOwned;
-use telldus::types;
+use common::telldus_types;
 use common::extmsg;
 
 const STR_CAPACITY: i32 = 20;
@@ -90,7 +90,7 @@ pub fn switch(id: i32, newstate: extmsg::State) {
 	}
 }
 
-fn get_sensors() -> Vec<types::Sensor> {
+fn get_sensors() -> Vec<telldus_types::Sensor> {
 	let mut sensors = Vec::new();
 	unsafe {
 		let mut return_val: c_int = 0;
@@ -117,12 +117,12 @@ fn get_sensors() -> Vec<types::Sensor> {
 				let value_string = cchar_to_string(value_bytes.as_ptr() as *const i8);
 				let temperature = value_string.parse::<f32>().unwrap();
 
-				let sensor = types::Sensor {id: id,
-								protocol: protocol,
-								model: model,
-								datatypes: datatype, 
-								temperature: temperature,
-								timestamp: timestamp};
+				let sensor = telldus_types::Sensor {	id: id,
+									protocol: protocol,
+									model: model,
+									datatypes: datatype, 
+									temperature: temperature,
+									timestamp: timestamp};
 				//println!("{}", sensor.to_string());
 
 				sensors.push(sensor);
@@ -140,7 +140,7 @@ fn map_state(value: i32) -> extmsg::State {
 	}
 }
 
-fn get_devices() -> Vec<types::Device> {
+fn get_devices() -> Vec<telldus_types::Device> {
 	let mut devices = Vec::new();
 	unsafe {
 		let num_devices = tdGetNumberOfDevices();
@@ -174,7 +174,7 @@ fn get_devices() -> Vec<types::Device> {
 			}
 			let state = map_state(lastsent);
 			
-			let device = types::Device { id: id, name: name, state: state };
+			let device = telldus_types::Device { id: id, name: name, state: state };
 			devices.push(device);
 		}
 	}
@@ -187,8 +187,8 @@ fn is_on_off_device(methods: i32) -> bool {
 	return mask != 0;
 }
 
-pub fn get_status() -> types::Status {
-	return types::Status{ sensors: get_sensors(), devices: get_devices() };
+pub fn get_status() -> telldus_types::Status {
+	return telldus_types::Status{ sensors: get_sensors(), devices: get_devices() };
 }
 
 fn cchar_to_string(char_ptr: *const c_char) -> String {

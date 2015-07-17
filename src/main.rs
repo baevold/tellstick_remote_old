@@ -13,11 +13,6 @@ extern crate time;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Sender, Receiver};
 
-#[derive(RustcEncodable, RustcDecodable)]
-pub struct Config {
-	clients: Vec<String>
-}
-
 #[allow(dead_code)]
 fn main() {
 	//uncomment to write new config. useful when changing the config signature

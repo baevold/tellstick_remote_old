@@ -4,17 +4,12 @@ mod telldus;
 mod sender;
 mod receiver;
 mod config;
-mod common;
-
-extern crate libc;
-extern crate rustc_serialize;
-extern crate time;
 
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Sender, Receiver};
 
 #[allow(dead_code)]
-fn main() {
+pub fn main() {
 	//uncomment to write new config. useful when changing the config signature
 	//config::write_config(); return;
 	//uncomment to write an extmsg::Message to stdout

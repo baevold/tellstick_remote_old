@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["stian <baekkevold@gmail.com>"]
 
 [[bin]]
-name = "report"
-path = "src/report.rs"
+name = "reporter"
+path = "src/reporter.rs"
 
 [[bin]]
 name = "websockethandler"

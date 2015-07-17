@@ -1,4 +1,4 @@
-use telldus;
+use report::telldus;
 use std::thread;
 use std::sync::mpsc::Receiver;
 use std::net::UdpSocket;

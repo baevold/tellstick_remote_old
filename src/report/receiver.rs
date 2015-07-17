@@ -3,7 +3,7 @@ use std::sync::mpsc::Sender;
 use std::net::UdpSocket;
 use std::str;
 use common::extmsg;
-use telldus;
+use report::telldus;
 
 const INTERVAL: u32 = 3000;
 const RECEIVEBUFFERSIZE: usize = 1024;

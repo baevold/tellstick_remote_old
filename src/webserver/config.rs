@@ -2,19 +2,19 @@ use std::fs::File;
 use std::io::prelude::*;
 use rustc_serialize::json::{self};
 
-static CONFIGFILE: &'static str = "cnf/report.json";
+static CONFIGFILE: &'static str = "cnf/webserver.json";
 
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Config {
-	pub receiver_port: u16,
-	pub password: String,
-        pub clients: Vec<String>
+	pub hash: String,
+	pub port: i32
 }
 
 #[allow(dead_code)]
 pub fn write_config() {
-        let clients = [String::from("someserver:8888")];
-        let config = Config{ receiver_port: 8877, password: String::from("passwordhash"), clients: clients.to_vec() };
+	let hash = "myhash".to_string();
+	let port = 8876;
+        let config = Config{ hash: hash, port: port };
         let data: String = json::encode(&config).unwrap();
         println!("use echo '[data]' | jq . to prettyfi. Remember the quotes!");
         println!("{}", data);

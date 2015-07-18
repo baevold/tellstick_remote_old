@@ -15,3 +15,6 @@ path = "src/websocket_handler.rs"
 libc = "0.1.8"
 rustc-serialize = "0.3"
 time = "0.1.26"
+
+[dependencies.websocket]
+git = "https://github.com/cyderize/rust-websocket.git"

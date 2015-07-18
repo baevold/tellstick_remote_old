@@ -12,7 +12,8 @@ pub struct Config {
 
 #[allow(dead_code)]
 pub fn write_config() {
-	let hash = "myhash".to_string();
+	//hash is for user=a and password=a
+	let hash = "98398f51aa78aaf6309be3d93ad27fb1c1b21cb6".to_string();
 	let port = 8876;
         let config = Config{ hash: hash, port: port };
         let data: String = json::encode(&config).unwrap();

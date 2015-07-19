@@ -47,13 +47,13 @@ function dologin() {
 	};
 	socket.onopen = function(event) {
 		//object must be formatted so that the json output format is correct for rust json
-		var msg = {"variant":"Login", "fields":[hash]};
+		var msg = {"hash":hash, "action":"Login"};
 		var msgjson = JSON.stringify(msg);
 		socket.send(msgjson);
 	};
 	socket.onmessage = function(event) {
 		var msg = JSON.parse(event.data);
-		returnedhash = msg.fields[0];
+		returnedhash = msg.hash;
 		returnval = "done";
 	};
 	var waitforhash = function(callback) {

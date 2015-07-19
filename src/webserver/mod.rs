@@ -13,8 +13,9 @@ static LOCALADDR: &'static str = "127.0.0.1";
 
 pub fn main() {
 	println!("Hello from webserver");
-	let a: webtypes::Action = webtypes::Action::Login("hei".to_string());
-	let jstring = json::encode(&a).unwrap();
+	let a: webtypes::Action = webtypes::Action::Login;
+	let b: webtypes::Message = webtypes::Message{ hash: "hei".to_string(), action: a };
+	let jstring = json::encode(&b).unwrap();
 	println!("{}", jstring);
 	let config = config::read_config().unwrap();
 	//config::write_config();
@@ -72,10 +73,10 @@ fn handle_connections(config: config::Config) {
 }
 
 fn handle_message(msg: String, hash: &String) -> Option<String> {
-	let message = webtypes::Action::from_string(msg.clone()).unwrap();
-	match message {
-		webtypes::Action::Login(received_hash) => {
-			if str::from_utf8(received_hash.as_bytes()).unwrap() == str::from_utf8(hash.as_bytes()).unwrap() {
+	let message = webtypes::Message::from_string(msg.clone()).unwrap();
+	match message.action {
+		webtypes::Action::Login => {
+			if str::from_utf8(message.hash.as_bytes()).unwrap() == str::from_utf8(hash.as_bytes()).unwrap() {
 				println!("hash is correct");
 				return Some(msg);
 			} else {
@@ -83,5 +84,6 @@ fn handle_message(msg: String, hash: &String) -> Option<String> {
 				return None;
 			}
 		}
+		webtypes::Action::RequestStatus => { return None; }
 	}
 }

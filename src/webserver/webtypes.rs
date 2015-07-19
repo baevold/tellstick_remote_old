@@ -3,11 +3,18 @@ use std::str;
 
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum Action {
-	Login(String)
+	Login,
+	RequestStatus
 }
 
-impl Action {
-        pub fn from_string(s: String) -> Result<Action, json::DecoderError> {
+#[derive(RustcEncodable, RustcDecodable)]
+pub struct Message {
+	pub hash: String,
+	pub action: Action
+}
+
+impl Message {
+        pub fn from_string(s: String) -> Result<Message, json::DecoderError> {
                 return json::decode(str::from_utf8(s.as_bytes()).unwrap());
         }
 }

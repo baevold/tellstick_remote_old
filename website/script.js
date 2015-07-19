@@ -135,10 +135,11 @@ function runstatus() {
 		if (status == "") {
 			//did not get a status. Show error message.
 			console.log("Did not get a status");
-			pContent.innerHTML = "<label>Problemer på server. Fikk ingen status</label>";
+			pContent.innerHTML = "<label>Problem med server. Fikk ingen status</label>";
 		} else {
 			//did get a status. populate
 			console.log("Status received");
+			pContent.innerHTML = "<label>Fikk en status</label>";
 			populate(status, pContent);
 		}
 		socket.close();

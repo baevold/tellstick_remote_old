@@ -1,5 +1,7 @@
 use std::string::String;
 use common::extmsg;
+use rustc_serialize::json::{self};
+use std::str;
 
 #[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Sensor {
@@ -22,6 +24,13 @@ impl ToString for Sensor {
 pub struct Status {
 	pub sensors: Vec<Sensor>,
 	pub devices: Vec<Device>
+}
+
+#[allow(dead_code)]
+impl Status {
+	pub fn from_string(s: String) -> Result<Status, json::DecoderError> {
+		return json::decode(str::from_utf8(s.as_bytes()).unwrap());
+	}
 }
 
 #[derive(RustcEncodable, RustcDecodable)]

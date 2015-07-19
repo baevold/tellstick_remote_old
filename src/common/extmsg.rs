@@ -36,6 +36,7 @@ pub struct Message {
 	pub action: Action,
 }
 
+#[allow(dead_code)]
 impl Message {
 	pub fn from_string(s: String) -> Result<Message, json::DecoderError> {
 		return json::decode(str::from_utf8(s.as_bytes()).unwrap());

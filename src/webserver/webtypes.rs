@@ -21,19 +21,20 @@ impl Message {
         }
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Status {
 	pub zones: Vec<Zone>
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Zone {
 	pub name: String,
+	pub temp: f32,
 	pub switches: Vec<Switch>
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Switch {
 	pub name: String,
 	pub state: extmsg::State
-}
+}	

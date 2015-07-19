@@ -1,7 +1,7 @@
 use rustc_serialize::json::{self};
 use std::str;
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(RustcEncodable, RustcDecodable, Clone)]
 pub enum State {
 	On,
 	Off

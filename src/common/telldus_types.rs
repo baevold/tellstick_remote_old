@@ -20,7 +20,7 @@ impl ToString for Sensor {
 	}
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Status {
 	pub sensors: Vec<Sensor>,
 	pub devices: Vec<Device>
@@ -33,7 +33,7 @@ impl Status {
 	}
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(RustcEncodable, RustcDecodable, Clone)]
 pub struct Device {
 	pub id: i32,
 	pub name: String,

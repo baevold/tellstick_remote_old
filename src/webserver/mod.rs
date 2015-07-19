@@ -42,7 +42,9 @@ pub fn main() {
 	let mut telldus_status = telldus_types::Status{sensors: sensors, devices: devices};
 	
 	//read mapping
+	//config::write_mapping();
 	let mapping = config::read_mapping().unwrap();
+	println!("after mapping read");
 
 	//get initial web status
 	let mut webstatus = to_webstatus(&telldus_status, &mapping);

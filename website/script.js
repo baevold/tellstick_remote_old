@@ -14,9 +14,7 @@ function runlogin() {
 	var pContent = document.getElementById('pContent');
 	console.log("hash is NOT ok. Loading login");
 	pContent.innerHTML =	
-				'<section class="loginform cf">' +
-				'<form name="login" action="index_submit" accept-charset="utf-8">' +
-				'<div data-role="fieldcontain">' +
+				'<form onsubmit="return dologin()" action="" method="get"><div data-role="fieldcontain">' +
 				'<label for="user">Brukernavn</label>' +
 				'<input type="text" id="user" name="user" placeholder="brukernavn" required />' +
 				'</div>' +
@@ -24,11 +22,9 @@ function runlogin() {
 				'<label for="password">Passord</label>' +
 				'<input type="password" id="password" name="password" placeholder="passord" required />' +
 				'</div>' +
-				'<input type="submit" onclick="dologin()" value="Logg inn"></div>' +
-				'</form></section>';
-	pContent.innerHTML +=
-				'<br>' +
-				'<label name="status" id="status"></label>';
+				'<input type="submit" name="login" value="Logg inn"></div></form>';
+
+	pContent.innerHTML +=	'<br><label name="status" id="status"></label>';
 }
 
 function dologin() {
@@ -61,12 +57,12 @@ function dologin() {
 			if (returnval == "done") {
 				console.log("done waiting for reply");
 				callback();
-				return;
+				return false;
 			} else {
 				count++;
 				if (count*idletime>=maxtime) {
 					callback();
-					return;
+					return false;
 				}
 				console.log("Waiting for hash reply");
 				waitforhash(callback);
@@ -83,11 +79,16 @@ function dologin() {
 		} else {
 			//hash is not ok
 			var statuslabel = document.getElementById('status');
-			statuslabel.innerHTML = 'Feil passord eller server nede';
+			if (socket.readyState == 1) {
+				statuslabel.innerHTML = 'Feil passord';
+			} else {
+				statuslabel.innerHTML = 'Server nede';
+			}
 			console.log("hash is not ok");
 		}
 		socket.close();
 	});
+	return false;
 }
 
 function runstatus() {

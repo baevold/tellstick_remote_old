@@ -70,8 +70,9 @@ pub fn handle_client_connections(config: &Arc<config::Config>, tx: mpsc::Sender<
 
 fn handle_message(msg: String, hash: &String, tx: &mpsc::Sender<internaltypes::InternalAction>) -> Option<String> {
 	let message = webtypes::Message::from_string(msg.clone()).unwrap();
-	if str::from_utf8(message.hash.as_bytes()).unwrap() == str::from_utf8(hash.as_bytes()).unwrap() {
+	if str::from_utf8(message.hash.as_bytes()).unwrap() != str::from_utf8(hash.as_bytes()).unwrap() {
 		println!("Got message with wrong hash. Silently ignoring");
+		println!("{}", hash);
 		return None;
 	}
 	match message.action {

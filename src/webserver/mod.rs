@@ -37,8 +37,12 @@ pub fn main() {
 
 	//let this thread handle interthread communication and matching between telldus status and web status
 	//init a telldus status
-	let sensors: Vec<telldus_types::Sensor> = Vec::new();
-	let devices: Vec<telldus_types::Device> = Vec::new();
+	let sensor = telldus_types::Sensor{ id: 1, protocol: "dummy".to_string(), model: "dummy".to_string(), datatypes: 1, temperature: 10.0, timestamp: 0 };
+	let device = telldus_types::Device{ id: 1, name: "dummyswitch".to_string(), state: extmsg::State::On };
+	let mut sensors: Vec<telldus_types::Sensor> = Vec::new();
+	sensors.push(sensor);
+	let mut devices: Vec<telldus_types::Device> = Vec::new();
+	devices.push(device);
 	let mut telldus_status = telldus_types::Status{sensors: sensors, devices: devices};
 	
 	//read mapping

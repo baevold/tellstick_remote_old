@@ -8,8 +8,8 @@ name = "reporter"
 path = "src/reporter.rs"
 
 [[bin]]
-name = "websockethandler"
-path = "src/websocket_handler.rs"
+name = "wshandler"
+path = "src/wshandler.rs"
 
 [dependencies]
 libc = "0.1.8"

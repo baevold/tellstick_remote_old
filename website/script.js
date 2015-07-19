@@ -57,12 +57,12 @@ function dologin() {
 			if (returnval == "done") {
 				console.log("done waiting for reply");
 				callback();
-				return false;
+				return;
 			} else {
 				count++;
 				if (count*idletime>=maxtime) {
 					callback();
-					return false;
+					return;
 				}
 				console.log("Waiting for hash reply");
 				waitforhash(callback);
@@ -93,4 +93,59 @@ function dologin() {
 
 function runstatus() {
 	console.log("hash is ok. Loading status");
+	var status = "";
+	var hash = window.localStorage.getItem("hash");
+	var socket = new WebSocket('ws://localhost:8876', 'rust-websocket');
+	var returnval = "";
+	var count = 0;
+	var idletime = 50;
+	var maxtime = 1000;
+	socket.onerror = function(event) {
+		console.log('error');
+		returnval = "done";
+	};
+	socket.onopen = function(event) {
+		//object must be formatted so that the json output format is correct for rust json
+		var msg = {"hash":hash, "action":"RequestStatus"};
+		var msgjson = JSON.stringify(msg);
+		socket.send(msgjson);
+	};
+	socket.onmessage = function(event) {
+		status = JSON.parse(event.data);
+		returnval = "done";
+	};
+	var waitforstatus = function(callback) {
+		setTimeout(function() {
+			if (returnval == "done") {
+				console.log("done waiting for reply");
+				callback();
+				return;
+			} else {
+				count++;
+				if (count*idletime>=maxtime) {
+					callback();
+					return;
+				}
+				console.log("Waiting for reply");
+				waitforstatus(callback);
+			}
+		}, idletime);
+	};
+	waitforstatus(function() {
+		if (status == "") {
+			//did not get a status. Show error message.
+			console.log("Did not get a status");
+			pContent.innerHTML = "<label>Problemer på server. Fikk ingen status</label>";
+		} else {
+			//did get a status. populate
+			console.log("Status received");
+			populate(status, pContent);
+		}
+		socket.close();
+	});
+	return false;
+}
+
+function populate(status, content) {
+	console.log("Populating");
 }

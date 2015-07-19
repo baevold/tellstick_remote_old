@@ -1,7 +1,17 @@
-var pContent = document.getElementById('pContent');
 if (isHashConfirmed() == "true") {
-	console.log("hash is ok. Not loading login");
+	runstatus();
 } else {
+	runlogin();
+}
+
+function isHashConfirmed() {
+	hash = window.localStorage.getItem("hash");
+	if (hash != null) return "true";
+	return "false";
+}
+
+function runlogin() {
+	var pContent = document.getElementById('pContent');
 	console.log("hash is NOT ok. Loading login");
 	pContent.innerHTML =	
 				'<section class="loginform cf">' +
@@ -80,29 +90,6 @@ function dologin() {
 	});
 }
 
-
-function isHashConfirmed() {
-	hash = window.localStorage.getItem("hash");
-	if (hash != null) return "true";
-	return "false";
+function runstatus() {
+	console.log("hash is ok. Loading status");
 }
-
-window.onload = function() {
-	return;
-
-	//get refs
-	var form = document.getElementById('message-form');
-	var statusField = document.getElementById('statusField');
-	var pContent = document.getElementById('pContent');
-
-	var socket = new WebSocket('ws://localhost:8876', 'rust-websocket');
-	socket.onerror = function(event) {
-		console.log('error');
-	};
-	socket.onopen = function(event) {
-		console.log('open');
-		statusField.innerHTML = 'Connected to: ' + event.currentTarget.URL;
-		statusField.className = 'open';
-	};
-}
-

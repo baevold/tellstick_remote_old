@@ -1,5 +1,6 @@
 {
   "hash": "98398f51aa78aaf6309be3d93ad27fb1c1b21cb6",
   "websocket_port": 8876,
-  "status_port":8877
+  "status_port":8877,
+  "telldus_client":"localhost:8890"
 }

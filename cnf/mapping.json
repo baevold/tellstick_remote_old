@@ -3,6 +3,7 @@
     {
       "id": 1,
       "name": "zone1",
+      "target": "22.0",
       "switches": [
         {
           "id": 1,

@@ -1,9 +1,11 @@
 use std::thread;
 use std::sync::Arc;
 use std::sync::mpsc;
+use std::str;
 use rustc_serialize::json::{self};
 use common::telldus_types;
 use common::extmsg;
+use std::net::UdpSocket;
 
 mod webtypes;
 mod config;
@@ -35,10 +37,13 @@ pub fn main() {
 	let tx_report = tx.clone();
 	thread::spawn(move || { statusreceiver::receive_status(&config_report, tx_report); });
 
+	//need config here as well
+	let config_main = config_arc.clone();
+
 	//let this thread handle interthread communication and matching between telldus status and web status
 	//init a telldus status
 	let sensor = telldus_types::Sensor{ id: 1, protocol: "dummy".to_string(), model: "dummy".to_string(), datatypes: 1, temperature: 10.0, timestamp: 0 };
-	let device = telldus_types::Device{ id: 1, name: "dummyswitch".to_string(), state: extmsg::State::On };
+	let device = telldus_types::Device{ id: 1, name: "dummyswitch".to_string(), state: extmsg::State::Off };
 	let mut sensors: Vec<telldus_types::Sensor> = Vec::new();
 	sensors.push(sensor);
 	let mut devices: Vec<telldus_types::Device> = Vec::new();
@@ -47,7 +52,7 @@ pub fn main() {
 	
 	//read mapping
 	//config::write_mapping();
-	let mapping = config::read_mapping().unwrap();
+	let mut mapping = config::read_mapping().unwrap();
 	println!("after mapping read");
 
 	//get initial web status
@@ -60,6 +65,14 @@ pub fn main() {
 			internaltypes::InternalAction::TellstickStatus(status) => {
 				telldus_status = status;
 				webstatus = to_webstatus(&telldus_status, &mapping);
+				update_switches(&mapping, &telldus_status, &config_main.telldus_client);
+			}
+			internaltypes::InternalAction::SetTemp(zonetemp) => {
+        			let mut data = json::encode(&mapping).unwrap();
+				println!("{}", &data);
+				set_new_temp(&mut mapping, zonetemp);
+        			data = json::encode(&mapping).unwrap();
+				println!("{}", data);
 			}
 		};
 	}
@@ -106,3 +119,64 @@ fn get_temp(status: &telldus_types::Status, id: i32) -> Option<f32> {
 	return None;
 }
 
+fn set_new_temp(oldmapping: &mut config::Mapping, zonetemp: webtypes::ZoneTemp) {
+	for zone in &mut oldmapping.zones {
+		if str::from_utf8(zone.name.as_bytes()).unwrap() == str::from_utf8(zonetemp.name.as_bytes()).unwrap() {
+			zone.target = zonetemp.temp;
+		}
+	}
+}
+
+fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, client: &String) {
+	fn get_sensor_by_id(id: i32, sensors: &Vec<telldus_types::Sensor>) -> Option<telldus_types::Sensor> {
+		let sensors = sensors.clone();
+		for sensor in sensors {
+			if sensor.id == id { return Some(sensor); }
+		}
+		return None;
+	}
+	fn get_device_by_id(id: i32, devices: &Vec<telldus_types::Device>) -> Option<telldus_types::Device> {
+		let devices = devices.clone();
+		for device in devices {
+			if device.id == id { return Some(device); }
+		}
+		return None;
+	}
+	let zones = mapping.zones.clone();
+	for zone in zones {
+		let sensor = get_sensor_by_id(zone.id, &status.sensors).unwrap();
+		if sensor.temperature < zone.target {
+			let switches = zone.switches.clone();
+			for switch in switches {
+				let switch = get_device_by_id(switch.id, &status.devices).unwrap();
+				match switch.state {
+					extmsg::State::On => switch_device(switch.id, extmsg::State::On, &client),
+					extmsg::State::Off => ()
+				}
+			}
+		}
+		if sensor.temperature > zone.target {
+			let switches = zone.switches.clone();
+			for switch in switches {
+				let switch = get_device_by_id(switch.id, &status.devices).unwrap();
+				match switch.state {
+					extmsg::State::On => (),
+					extmsg::State::Off => switch_device(switch.id, extmsg::State::Off, &client),
+				}
+			}
+		}
+	}
+}
+
+fn switch_device(id: i32, state: extmsg::State, client: &String) {
+	let switchdata = extmsg::SwitchData { id: id, state: state };
+	let vec = client.split(":").collect::<Vec<&str>>();
+	let ip = vec[0];
+	let port = String::from(vec[1]).parse::<u16>().unwrap();
+	let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
+	let data: String = json::encode(&switchdata).unwrap();
+	println!("Sending {}", data);
+	let buf = data.into_bytes();
+	socket.send_to(&buf, (ip, port)).unwrap();
+	drop(socket);
+}

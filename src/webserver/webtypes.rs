@@ -6,7 +6,8 @@ use common::extmsg;
 pub enum Action {
 	Login,
 	RequestStatus,
-	Status(Status)
+	Status(Status),
+	SetTemp(ZoneTemp)
 }
 
 #[derive(RustcEncodable, RustcDecodable)]
@@ -38,3 +39,9 @@ pub struct Switch {
 	pub name: String,
 	pub state: extmsg::State
 }	
+
+#[derive(RustcEncodable, RustcDecodable, Clone)]
+pub struct ZoneTemp {
+	pub name: String,
+	pub temp: f32
+}

@@ -9,7 +9,8 @@ static MAPPINGFILE: &'static str = "cnf/mapping.json";
 pub struct Config {
 	pub hash: String,
 	pub websocket_port: i32,
-	pub status_port: i32
+	pub status_port: i32,
+	pub telldus_client: String
 }
 
 #[allow(dead_code)]
@@ -17,7 +18,7 @@ pub fn write_config() {
 	//hash is for user=a and password=a
 	let hash = "98398f51aa78aaf6309be3d93ad27fb1c1b21cb6".to_string();
 	let port = 8876;
-        let config = Config{ hash: hash, websocket_port: port, status_port: port-1 };
+        let config = Config{ hash: hash, websocket_port: port, status_port: port-1, telldus_client: "localhost:8890".to_string() };
         let data: String = json::encode(&config).unwrap();
         println!("use echo '[data]' | jq . to prettyfi. Remember the quotes!");
         println!("{}", data);
@@ -66,8 +67,8 @@ pub fn write_mapping() {
 	let mut switches2 = Vec::new();
 	switches2.push(sw3);
 	switches2.push(sw4);
-	let zone1 = Zone{ id: 1, name: "zone1".to_string(), switches: switches };
-	let zone2 = Zone{ id: 2, name: "zone2".to_string(), switches: switches2 };
+	let zone1 = Zone{ id: 1, name: "zone1".to_string(), target: 1.0, switches: switches };
+	let zone2 = Zone{ id: 2, name: "zone2".to_string(), target: 3.0, switches: switches2 };
 	let mut zones = Vec::new();
 	zones.push(zone1);
 	zones.push(zone2);
@@ -81,6 +82,7 @@ pub fn write_mapping() {
 pub struct Zone {
 	pub id: i32,
 	pub name: String,
+	pub target: f32,
 	pub switches: Vec<Switch>
 }
 

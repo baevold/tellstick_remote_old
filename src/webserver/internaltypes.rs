@@ -5,5 +5,6 @@ use webserver::webtypes;
 
 pub enum InternalAction {
 	RequestStatus(Sender<webtypes::Status>),
-	TellstickStatus(telldus_types::Status)
+	TellstickStatus(telldus_types::Status),
+	SetTemp(webtypes::ZoneTemp)
 }

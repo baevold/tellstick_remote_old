@@ -9,9 +9,15 @@ use webserver::webtypes;
 use webserver::config;
 use webserver::internaltypes;
 
-static LOCALADDR: &'static str = "127.0.0.1";
+//static LOCALADDR: &'static str = "127.0.0.1";
+static LOCALADDR: &'static str = "0.0.0.0";
 
 pub fn handle_client_connections(config: &Arc<config::Config>, tx: mpsc::Sender<internaltypes::InternalAction>) {
+	let zt = webtypes::ZoneTemp { name: "hei".to_string(), temp: 1.0 };
+	let st = webtypes::Action::SetTemp(zt);
+	let sa = webtypes::Message{hash: "hash".to_string(), action: st };
+	let stjson = json::encode(&sa).unwrap();
+	println!("{}", stjson);
 	let localaddr = format!("{}:{}", LOCALADDR, config.websocket_port);
 	let server = Server::bind(str::from_utf8(localaddr.as_bytes()).unwrap()).unwrap();
 	for connection in server {
@@ -30,7 +36,6 @@ pub fn handle_client_connections(config: &Arc<config::Config>, tx: mpsc::Sender<
 			if let Some(&WebSocketProtocol(ref protocols)) = headers.get() {
 				if protocols.contains(&("rust-websocket".to_string())) {
 					//protocol is ok
-					println!("protocol is ok");
 					response.headers.set(WebSocketProtocol(vec!["rust-websocket".to_string()]));
 					validclient = true;
 				}
@@ -86,11 +91,17 @@ fn handle_message(msg: String, hash: &String, tx: &mpsc::Sender<internaltypes::I
 			tx.send(internaltypes::InternalAction::RequestStatus(mytx)).unwrap();
 			let status = myrx.recv().unwrap();
 			let status_json = json::encode(&status).unwrap();
+			println!("Sending {}", status_json);
 			return Some(status_json);
 		}
 		webtypes::Action::Status(_) => {
 			//shouldnt happen.
 			println!("Got status! Something wrong...");
+			return None;
+		}
+		webtypes::Action::SetTemp(zonetemp) => {
+			println!("Setting new temp for {} to {}", zonetemp.name, zonetemp.temp);
+			tx.send(internaltypes::InternalAction::SetTemp(zonetemp)).unwrap();
 			return None;
 		}
 	}

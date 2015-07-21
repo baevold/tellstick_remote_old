@@ -2,6 +2,7 @@
 name = "tellstick_remote"
 version = "0.1.0"
 authors = ["stian <baekkevold@gmail.com>"]
+build = "build.rs"
 
 [[bin]]
 name = "reporter"

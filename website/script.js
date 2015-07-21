@@ -172,7 +172,7 @@ function get_zone_html(zone) {
 function get_switch_html(sw) {
 	var switchid = sw.name + '_switch';
 	var switchhtml = 	'<fieldset>' +
-				'<div data-role="fieldcontain">' +
+				'<div data-role="fieldcontain" class="no-cursor">' +
 				'<label for="' + switchid + '">' + sw.name + '</label>' +
 				'<select name="' + switchid + '" id="' + switchid + '" data-role="flipswitch" value="' + sw.state + '" data-disabled="true">';
 	if (sw.state == "On") {

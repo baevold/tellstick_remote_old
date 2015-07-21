@@ -6,7 +6,7 @@ use common::extmsg;
 use report::telldus;
 
 const INTERVAL: u32 = 3000;
-const RECEIVEBUFFERSIZE: usize = 1024;
+const RECEIVEBUFFERSIZE: usize = 4096;
 
 pub fn start(port: u16, password: String, channel_sender: Sender<String>) -> thread::JoinHandle<()> {
 	return thread::spawn(move || { start_receiver(port, password, channel_sender); });
@@ -23,12 +23,12 @@ fn start_receiver(port: u16, password: String, channel_sender: Sender<String>) {
 	loop {
 		let mut buffer = [0; RECEIVEBUFFERSIZE];
 		let result = socket.recv_from(&mut buffer);
-		// prepending with _ negates to unused warning. ouch
-		let (_no_of_bytes, addr) = match result {
+		let (no, _) = match result {
 				Err(_) => continue,
 				Ok((a,b)) => (a,b)
 		};
-		let received_str = match str::from_utf8(&buffer) {
+		let data = Vec::from(&buffer[0..no]);
+		let received_str = match str::from_utf8(&data) {
 				Err(_) => { println!("Received non-utf8 data. Dropping it."); continue }, 
 				Ok(v) => v
 		};

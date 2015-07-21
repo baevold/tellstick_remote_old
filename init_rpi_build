@@ -1,13 +1,20 @@
 #!/bin/bash
 HERE=$(dirname $0)
 HERE=$(cd $HERE && pwd)
+
 DEPDIR=rpi_dependencies
+LIBDIR=lib/arm-unknown-linux-gnueabihf
 
 export OPENSSL_INCLUDE_DIR=$HERE/rpi_dependencies/libssl-dev/usr/include/
 
+if [ "$1" == "clean" ]; then
+	rm -rf lib $DEPDIR
+	exit
+fi
+
 if [ -d $DEPDIR ]; then
 	#run ./init_rpi_build load with first use or to force reload
-	[ "$1"  != "load" ] && exit
+	[ "$1" != "load" ] && exit
 fi
 
 mkdir -p $DEPDIR
@@ -25,9 +32,11 @@ do
 	dpkg -x $DEPDIR/$deb $DEBDIR
 done
 
-LIBDIR=lib/arm-unknown-linux-gnueabihf
 mkdir -p $LIBDIR
-[ -h $LIBDIR/libssl.so ] || ln -s rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libssl.so.1.0.0 $LIBDIR/libssl.so
-[ -h $LIBDIR/libcrypt.so ] || ln -s rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.0.0 $LIBDIR/libcrypt.so
-[ -h $LIBDIR/libtelldus-core.so ] || ln -s rpi_dependencies/libtelldus-core2/usr/lib/libtelldus-core.so.2.1.2 $LIBDIR/libtelldus-core.so
+#[ -h $LIBDIR/libssl.so ] || ln -s rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libssl.so.1.0.0 $LIBDIR/libssl.so
+#[ -h $LIBDIR/libcrypt.so ] || ln -s rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.0.0 $LIBDIR/libcrypt.so
+#[ -h $LIBDIR/libtelldus-core.so ] || ln -s rpi_dependencies/libtelldus-core2/usr/lib/libtelldus-core.so.2.1.2 $LIBDIR/libtelldus-core.so
+cp rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libssl.so.1.0.0 $LIBDIR/libssl.so
+cp rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.0.0 $LIBDIR/libcrypto.so
+cp rpi_dependencies/libtelldus-core2/usr/lib/libtelldus-core.so.2.1.2 $LIBDIR/libtelldus-core.so
 

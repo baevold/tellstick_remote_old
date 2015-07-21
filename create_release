@@ -1,0 +1,31 @@
+#!/bin/bash
+RELEASES="wshandler wshandler_rpi reporter reporter_rpi"
+TARGETDIR="releases"
+mkdir -p $TARGETDIR
+for rel in $RELEASES
+do
+	RELFILE=$rel
+	RELPATH=target/release
+	if [[ "$rel" == *_rpi ]]; then
+		RELPATH=target/arm-unknown-linux-gnueabihf/release
+		RELFILE=`echo $rel | awk -F_ '{$(NF--)="";print($0)}'`
+	fi
+	RR=$TARGETDIR/$rel
+	mkdir -p $RR/cnf
+	cp $RELPATH/$RELFILE $RR
+	if [[ "$RELFILE" == "wshandler" ]]; then
+		CONFIGFILES="webserver.json mapping.json"
+	elif [[ "$RELFILE" == "reporter" ]]; then
+		CONFIGFILES="report.json"
+	fi
+	for cf in $CONFIGFILES
+	do
+		cp cnf/$cf $RR/cnf/
+	done
+	cd $TARGETDIR >& /dev/null
+	tar cf $rel.tar $rel
+	rm -rf $rel
+	cd - >& /dev/null
+	echo "Completed release for $rel"
+done
+echo "Done"

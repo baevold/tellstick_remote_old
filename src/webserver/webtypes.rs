@@ -31,6 +31,7 @@ pub struct Status {
 pub struct Zone {
 	pub name: String,
 	pub temp: f32,
+	pub target: f32,
 	pub switches: Vec<Switch>
 }
 

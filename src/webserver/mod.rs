@@ -92,7 +92,7 @@ fn to_webstatus(status: &telldus_types::Status, mapping: &config::Mapping) -> we
 			Some(t) => t,
 			None => 0.0
 		};
-		let webzone = webtypes::Zone{ name: zone.name, temp: temp, switches: webswitches };
+		let webzone = webtypes::Zone{ name: zone.name, temp: temp, target: zone.target, switches: webswitches };
 		zones.push(webzone);
 	}
 	let webstatus = webtypes::Status{zones: zones};

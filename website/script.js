@@ -159,7 +159,7 @@ function get_zone_html(zone) {
 			'<label for="' + tempname + '">Temperatur</label>' +
 			'<p>' + temp + '</p>' +
 			'<label for="' + slidername + '">Måltemperatur</label>' +
-			'<input type="range" name="' + slidername + '" id="' + slidername + '" max="30" min="6" value="22" data-highlight="true" onchange="sliderchange(this)"/>' +
+			'<input type="range" name="' + slidername + '" id="' + slidername + '" max="30" min="6" value="' + zone.target + '" data-highlight="true" onchange="sliderchange(this)"/>' +
 			'<div>';
 	for (i = 0; i < zone.switches.length; i++) {
 		zonehtml += '<br><br>';

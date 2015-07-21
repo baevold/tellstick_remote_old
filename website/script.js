@@ -153,8 +153,11 @@ function get_zone_html(zone) {
 	//var zonehtml = '<fieldset data-role="controlgroup" class="ui-widget ui-widget-content"><legend>'+zone.name+'</legend>';
 	var zonehtml = '<div id="zonediv"><h4>' + zone.name + '</h4>';
 	var slidername = zone.name + '_slider';
+	var tempname = zone.name + '_temp';
 	zonehtml += 	'<div data-role="fieldcontain">' +
-			'<label for="' + slidername + '">Temperatur</label>' +
+			'<label for="' + tempname + '">Temperatur</label>' +
+			'<p>' + zone.temp + '</p>' +
+			'<label for="' + slidername + '">Måltemperatur</label>' +
 			'<input type="range" name="' + slidername + '" id="' + slidername + '" max="30" min="6" value="22" data-highlight="true" onchange="sliderchange(this)"/>' +
 			'<div>';
 	for (i = 0; i < zone.switches.length; i++) {

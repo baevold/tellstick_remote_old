@@ -29,6 +29,7 @@ pub fn receive_status(config: &Arc<config::Config>, tx: mpsc::Sender<internaltyp
 				Err(_) => { println!("Received non-utf8 data. Dropping it."); continue }, 
 				Ok(v) => v
 		};
+		println!("{}", received_str);
 		let status = match telldus_types::Status::from_string(received_str.to_string()) {
 			Ok(v) => v,
 			Err(_) => continue

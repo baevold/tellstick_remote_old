@@ -28,4 +28,6 @@ do
 	cd - >& /dev/null
 	echo "Completed release for $rel"
 done
+tar cf $TARGETDIR/website.tar website
+echo "Completed release for website"
 echo "Done"

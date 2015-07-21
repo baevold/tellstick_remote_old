@@ -10,7 +10,8 @@ pub struct Config {
 	pub hash: String,
 	pub websocket_port: i32,
 	pub status_port: i32,
-	pub telldus_client: String
+	pub telldus_client: String,
+	pub telldus_password: String
 }
 
 #[allow(dead_code)]
@@ -18,7 +19,7 @@ pub fn write_config() {
 	//hash is for user=a and password=a
 	let hash = "98398f51aa78aaf6309be3d93ad27fb1c1b21cb6".to_string();
 	let port = 8876;
-        let config = Config{ hash: hash, websocket_port: port, status_port: port-1, telldus_client: "localhost:8890".to_string() };
+        let config = Config{ hash: hash, websocket_port: port, status_port: port-1, telldus_client: "localhost:8890".to_string(), telldus_password: "passord".to_string() };
         let data: String = json::encode(&config).unwrap();
         println!("use echo '[data]' | jq . to prettyfi. Remember the quotes!");
         println!("{}", data);

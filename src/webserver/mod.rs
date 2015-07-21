@@ -150,8 +150,8 @@ fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, cl
 			for switch in switches {
 				let switch = get_device_by_id(switch.id, &status.devices).unwrap();
 				match switch.state {
-					extmsg::State::On => switch_device(switch.id, extmsg::State::On, &client, &password),
-					extmsg::State::Off => ()
+					extmsg::State::Off => switch_device(switch.id, extmsg::State::On, &client, &password),
+					extmsg::State::On => ()
 				}
 			}
 		}
@@ -160,8 +160,8 @@ fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, cl
 			for switch in switches {
 				let switch = get_device_by_id(switch.id, &status.devices).unwrap();
 				match switch.state {
-					extmsg::State::On => (),
-					extmsg::State::Off => switch_device(switch.id, extmsg::State::Off, &client, &password),
+					extmsg::State::Off => (),
+					extmsg::State::On => switch_device(switch.id, extmsg::State::Off, &client, &password),
 				}
 			}
 		}
@@ -169,6 +169,7 @@ fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, cl
 }
 
 fn switch_device(id: i32, state: extmsg::State, client: &String, password: &String) {
+	println!("Switching device {}", id);
 	let switchdata = extmsg::SwitchData { id: id, state: state };
 	let msg = extmsg::Message { password: password.clone(), action: extmsg::Action::Switch(switchdata) };
 	let vec = client.split(":").collect::<Vec<&str>>();

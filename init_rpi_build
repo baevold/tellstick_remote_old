@@ -1,0 +1,33 @@
+#!/bin/bash
+HERE=$(dirname $0)
+HERE=$(cd $HERE && pwd)
+DEPDIR=rpi_dependencies
+
+export OPENSSL_INCLUDE_DIR=$HERE/rpi_dependencies/libssl-dev/usr/include/
+
+if [ -d $DEPDIR ]; then
+	#run ./init_rpi_build load with first use or to force reload
+	[ "$1"  != "load" ] && exit
+fi
+
+mkdir -p $DEPDIR
+wget -O $DEPDIR/libssl_1.0.0_armhf.deb http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.0.0_1.0.1e-2+deb7u17_armhf.deb
+wget -O $DEPDIR/libssl-dev_1.0.1_armhf.deb http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl-dev_1.0.1e-2+deb7u17_armhf.deb
+wget -O $DEPDIR/libtelldus-core2_2.1.2-1_armhf.deb http://download.telldus.com/debian/pool/stable/libtelldus-core2_2.1.2-1_armhf.deb
+
+for deb in $(ls $DEPDIR)
+do
+	[ -d $DEPDIR/$deb ] && continue
+	DEBDIR=`echo $deb | awk -F_ '{print($1)}'`
+	DEBDIR=$DEPDIR/$DEBDIR
+	rm -rf $DEBDIR
+	mkdir -p $DEBDIR
+	dpkg -x $DEPDIR/$deb $DEBDIR
+done
+
+LIBDIR=lib/arm-unknown-linux-gnueabihf
+mkdir -p $LIBDIR
+[ -h $LIBDIR/libssl.so ] || ln -s rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libssl.so.1.0.0 $LIBDIR/libssl.so
+[ -h $LIBDIR/libcrypt.so ] || ln -s rpi_dependencies/libssl/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.0.0 $LIBDIR/libcrypt.so
+[ -h $LIBDIR/libtelldus-core.so ] || ln -s rpi_dependencies/libtelldus-core2/usr/lib/libtelldus-core.so.2.1.2 $LIBDIR/libtelldus-core.so
+

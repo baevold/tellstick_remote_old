@@ -151,7 +151,7 @@ function populate(storedstatus) {
 
 function get_zone_html(zone) {
 	//var zonehtml = '<fieldset data-role="controlgroup" class="ui-widget ui-widget-content"><legend>'+zone.name+'</legend>';
-	var zonehtml = '<div id="zonediv"><h4>' + zone.name + '</h4>';
+	var zonehtml = '<div id="zonediv"><h2>' + zone.name + '</h4>';
 	var slidername = zone.name + '_slider';
 	var tempname = zone.name + '_temp';
 	var temp = Math.round(zone.temp*10)/10;
@@ -161,8 +161,8 @@ function get_zone_html(zone) {
 			'<label for="' + slidername + '">Måltemperatur</label>' +
 			'<input type="range" name="' + slidername + '" id="' + slidername + '" max="30" min="6" value="' + zone.target + '" data-highlight="true" onchange="sliderchange(this)"/>' +
 			'<div>';
+	zonehtml += '<br><br>';
 	for (i = 0; i < zone.switches.length; i++) {
-		zonehtml += '<br><br>';
 		zonehtml += get_switch_html(zone.switches[i]);
 	}
 	zonehtml += '</div>';

@@ -51,7 +51,7 @@ pub fn main() {
 	let mut telldus_status = telldus_types::Status{sensors: sensors, devices: devices};
 	
 	//read mapping
-	//config::write_mapping();
+	config::write_mapping();
 	let mut mapping = config::read_mapping().unwrap();
 	println!("after mapping read");
 
@@ -84,7 +84,10 @@ fn to_webstatus(status: &telldus_types::Status, mapping: &config::Mapping) -> we
 	for zone in mapping.zones {
 		let mut webswitches = Vec::new();
 		for switch in zone.switches {
-			let state = get_switch_state(&status, switch.id).unwrap();
+			let state = match get_switch_state(&status, switch.id) {
+				Some(s) => s,
+				None => { return webtypes::Status{zones: zones}; }
+			};
 			let switch = webtypes::Switch{ name: switch.name, state: state };
 			webswitches.push(switch);
 		}
@@ -106,6 +109,7 @@ fn get_switch_state(status: &telldus_types::Status, id: i32) -> Option<extmsg::S
 			return Some(device.state);
 		}
 	}
+	println!("Could not find switch with id {}", id);
 	return None;
 }
 
@@ -116,6 +120,7 @@ fn get_temp(status: &telldus_types::Status, id: i32) -> Option<f32> {
 			return Some(sensor.temperature);
 		}
 	}
+	println!("Could not find sensor with id {}", id);
 	return None;
 }
 

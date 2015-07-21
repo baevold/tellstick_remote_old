@@ -69,10 +69,10 @@ pub fn write_mapping() {
 	switches2.push(sw3);
 	switches2.push(sw4);
 	let zone1 = Zone{ id: 1, name: "zone1".to_string(), target: 1.0, switches: switches };
-	let zone2 = Zone{ id: 2, name: "zone2".to_string(), target: 3.0, switches: switches2 };
+	//let zone2 = Zone{ id: 2, name: "zone2".to_string(), target: 3.0, switches: switches2 };
 	let mut zones = Vec::new();
 	zones.push(zone1);
-	zones.push(zone2);
+	//zones.push(zone2);
 	let mapping = Mapping {zones: zones};
         let data: String = json::encode(&mapping).unwrap();
         println!("use echo '[data]' | jq . to prettyfi. Remember the quotes!");

@@ -154,9 +154,10 @@ function get_zone_html(zone) {
 	var zonehtml = '<div id="zonediv"><h4>' + zone.name + '</h4>';
 	var slidername = zone.name + '_slider';
 	var tempname = zone.name + '_temp';
+	var temp = Math.round(zone.temp*10)/10;
 	zonehtml += 	'<div data-role="fieldcontain">' +
 			'<label for="' + tempname + '">Temperatur</label>' +
-			'<p>' + zone.temp + '</p>' +
+			'<p>' + temp + '</p>' +
 			'<label for="' + slidername + '">Måltemperatur</label>' +
 			'<input type="range" name="' + slidername + '" id="' + slidername + '" max="30" min="6" value="22" data-highlight="true" onchange="sliderchange(this)"/>' +
 			'<div>';

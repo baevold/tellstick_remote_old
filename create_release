@@ -15,13 +15,16 @@ do
 	cp $RELPATH/$RELFILE $RR
 	if [[ "$RELFILE" == "wshandler" ]]; then
 		CONFIGFILES="webserver.json mapping.json"
+		SERVICENAME="tswshandler"
 	elif [[ "$RELFILE" == "reporter" ]]; then
 		CONFIGFILES="report.json"
+		SERVICENAME="tsreporter"
 	fi
 	for cf in $CONFIGFILES
 	do
 		cp cnf/$cf $RR/cnf/
 	done
+	cp services/$SERVICENAME $RR/
 	cd $TARGETDIR >& /dev/null
 	tar cf $rel.tar $rel
 	rm -rf $rel

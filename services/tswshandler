@@ -1,7 +1,7 @@
 #!/bin/sh
 # Snatched from https://github.com/fhd/init-script-template
 ### BEGIN INIT INFO
-# Provides:          WebSocket handler for tellstick remote control
+# Provides:          Tellstick remote WebSocket handler
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5

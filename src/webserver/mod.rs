@@ -149,11 +149,17 @@ fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, cl
 	}
 	let zones = mapping.zones.clone();
 	for zone in zones {
-		let sensor = get_sensor_by_id(zone.id, &status.sensors).unwrap();
+		let sensor = match get_sensor_by_id(zone.id, &status.sensors) {
+			Some(s) => s,
+			None => { error!("Could not get sensor for zone.id={}", zone.id); return; }
+		};
 		if sensor.temperature < zone.target {
 			let switches = zone.switches.clone();
 			for switch in switches {
-				let switch = get_device_by_id(switch.id, &status.devices).unwrap();
+				let switch = match get_device_by_id(switch.id, &status.devices) {
+					Some(s) => s,
+					None => { error!("Could not get device with id={}", switch.id); return; }
+				};
 				match switch.state {
 					extmsg::State::Off => switch_device(switch.id, extmsg::State::On, &client, &password),
 					extmsg::State::On => ()

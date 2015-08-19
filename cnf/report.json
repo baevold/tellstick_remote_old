@@ -1,7 +1,7 @@
 {
   "clients": [
-    "baekkevold.net:8876"
+    "localhost:8877"
   ],
   "password": "passwordhash",
-  "receiver_port": 8877
+  "receiver_port": 8878
 }

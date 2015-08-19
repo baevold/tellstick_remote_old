@@ -30,6 +30,7 @@ pub fn receive_status(config: &Arc<config::Config>, tx: mpsc::Sender<internaltyp
 				Ok(v) => v
 		};
 		let received_str = received_str.to_string();
+		info!("Received {}", received_str);
 		let status = match telldus_types::Status::from_string(received_str) {
 			Ok(v) => v,
 			Err(e) => {

@@ -52,5 +52,6 @@ fn start_receiver(port: u16, password: String, channel_sender: Sender<String>) {
 }
 
 fn switch(data: extmsg::SwitchData) {
+	println!("Switching device {} to {}", data.id, data.state.to_string());
 	telldus::switch(data.id, data.state);
 }

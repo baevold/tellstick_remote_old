@@ -4,9 +4,10 @@ mod telldus;
 mod sender;
 mod receiver;
 mod config;
+mod internaltypes;
 
 use std::sync::mpsc::channel;
-use std::sync::mpsc::{Sender, Receiver};
+use std::thread;
 
 #[allow(dead_code)]
 pub fn main() {
@@ -17,12 +18,21 @@ pub fn main() {
 	
 	let config = config::read_config().unwrap();
 
-	let (tx, rx): (Sender<String>, Receiver<String>) = channel();
+	let (tx, rx) = channel();
+	let timertx = tx.clone();
 
 	let recv_handle = receiver::start(config.receiver_port, config.password, tx);
 	let send_handle = sender::start(config.clients, rx);
 	recv_handle.join().unwrap();
 	send_handle.join().unwrap();
+
+	// regular updates are initiated here. a simple timer which notifies the sender
+	thread::spawn(move || {
+		loop {
+			timertx.send(internaltypes::SenderAction::Update).unwrap();
+			thread::sleep_ms(5000 as u32);
+		}
+	});
 }
 
 #[test]

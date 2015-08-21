@@ -4,15 +4,16 @@ use std::net::UdpSocket;
 use std::str;
 use common::extmsg;
 use report::telldus;
+use report::internaltypes::SenderAction;
 
 const INTERVAL: u32 = 3000;
 const RECEIVEBUFFERSIZE: usize = 4096;
 
-pub fn start(port: u16, password: String, channel_sender: Sender<String>) -> thread::JoinHandle<()> {
+pub fn start(port: u16, password: String, channel_sender: Sender<SenderAction>) -> thread::JoinHandle<()> {
 	return thread::spawn(move || { start_receiver(port, password, channel_sender); });
 }
 
-fn start_receiver(port: u16, password: String, channel_sender: Sender<String>) {
+fn start_receiver(port: u16, password: String, channel_sender: Sender<SenderAction>) {
 	let addr = format!("0.0.0.0:{}", port);
 	let socket_str = str::from_utf8(addr.as_bytes()).unwrap();
 	let result = UdpSocket::bind(socket_str);
@@ -43,8 +44,11 @@ fn start_receiver(port: u16, password: String, channel_sender: Sender<String>) {
 			continue;
 		}
 		match msg.action {
-			extmsg::Action::Register => channel_sender.send(addr.to_string()).unwrap(),
-			extmsg::Action::Switch(d) => switch(d)
+			extmsg::Action::Register => channel_sender.send(SenderAction::Register(addr.to_string())).unwrap(),
+			extmsg::Action::Switch(d) => {
+				switch(d);
+				channel_sender.send(SenderAction::Update);
+			}
 		}
 		
 		thread::sleep_ms(INTERVAL);

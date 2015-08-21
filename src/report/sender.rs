@@ -2,32 +2,36 @@ use report::telldus;
 use std::thread;
 use std::sync::mpsc::Receiver;
 use std::net::UdpSocket;
-use time;
 use rustc_serialize::json::{self};
 use common::telldus_types;
+use report::internaltypes::SenderAction;
 
-static INTERVAL: u32 = 5000;
-
-pub fn start(clients: Vec<String>, channel_receiver: Receiver<String>) -> thread::JoinHandle<()> {
+pub fn start(clients: Vec<String>, channel_receiver: Receiver<SenderAction>) -> thread::JoinHandle<()> {
 	return thread::spawn(move || { start_sender(clients, channel_receiver); });
 }
 
-fn start_sender(clients: Vec<String>, channel_receiver: Receiver<String>) {
+fn start_sender(clients: Vec<String>, channel_receiver: Receiver<SenderAction>) {
 	let mut clients = clients.clone();
 	loop {
-		let start = time::SteadyTime::now();
-		let recv_result = channel_receiver.try_recv();
-		clients = match recv_result {
-			Ok(v) => { if validate_message(v.clone()) { let mut l = clients.clone(); l.push(v.clone()); l} else { clients.clone() } },
-			Err(_) => { clients.clone() }
-		};
+		let action = channel_receiver.recv().unwrap();
+		match action {
+			SenderAction::Update => {},
+			SenderAction::Register(newclient) => {
+				clients = update_clients(&mut clients, newclient);
+			}
+		}
 		for client in clients.clone() {
 			send_status(get_status(), client);
 		}
-		let diff = (time::SteadyTime::now() - start).num_milliseconds();
-		if diff < INTERVAL as i64 {
-			thread::sleep_ms(INTERVAL-diff as u32);
-		}
+	}
+}
+
+fn update_clients(clients: &mut Vec<String>, newclient: String) -> Vec<String> {
+	if validate_message(&newclient) {
+		clients.push(newclient.clone());
+		return clients.clone();
+	} else {
+		return clients.clone();
 	}
 }
 
@@ -50,7 +54,7 @@ fn send_status(status: telldus_types::Status, client: String) {
 	drop(socket);
 }
 
-fn validate_message(msg: String) -> bool {
+fn validate_message(msg: &String) -> bool {
 	let vec = msg.split(":");
 	if vec.count() == 2 { return true; }
 	return false;

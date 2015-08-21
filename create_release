@@ -1,13 +1,20 @@
 #!/bin/bash
 RELEASES="wshandler wshandler_rpi reporter reporter_rpi"
 TARGETDIR="releases"
+
+BUILD="release"
+
+if [[ "$1" == "debug" ]]; then
+	BUILD="debug"
+fi
+
 mkdir -p $TARGETDIR
 for rel in $RELEASES
 do
 	RELFILE=$rel
-	RELPATH=target/release
+	RELPATH=target/$BUILD
 	if [[ "$rel" == *_rpi ]]; then
-		RELPATH=target/arm-unknown-linux-gnueabihf/release
+		RELPATH=target/arm-unknown-linux-gnueabihf/$BUILD
 		RELFILE=`echo $rel | awk -F_ '{$(NF--)="";print($0)}'`
 	fi
 	RR=$TARGETDIR/$rel

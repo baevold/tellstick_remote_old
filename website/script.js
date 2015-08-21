@@ -1,5 +1,5 @@
 var targetport = 8876;
-var targetaddress = "hytte.baekkevold.net";
+var targetaddress = "baekkevold.dynamic-dns.net";
 var target = targetaddress+":"+targetport;
 var wsprotocol = "rust-websocket";
 
@@ -116,7 +116,6 @@ function runstatus() {
 		var msg = {"hash":hash, "action":"RequestStatus"};
 		var msgjson = JSON.stringify(msg);
 		socket.send(msgjson);
-
 	};
 	socket.onmessage = function(event) {
 		window.localStorage.setItem("status",event.data);
@@ -137,6 +136,35 @@ function runstatus() {
 function loadGeneratedStatus() {
 	var hash = window.localStorage.getItem("hash");
 	socket = new WebSocket('ws://'+target, wsprotocol);
+	socket.onopen = function(event) {
+		//object must be formatted so that the json output format is correct for rust json
+		var msg = {"hash":hash, "action":"Login"};
+		var msgjson = JSON.stringify(msg);
+		socket.send(msgjson);
+	};
+	socket.onmessage = function(event) {
+		var statusdata = event.data;
+		var obj = JSON.parse(statusdata);
+		if (!obj.hasOwnProperty('zones')) {
+			//dont care if it is not a status
+			return;
+		}
+		for (i = 0; i < obj.zones.length; i++) {
+			var zone = obj.zones[i];
+			var tempname = zone.name + '_temp';
+			var temp = Math.round(zone.temp*10)/10;
+			document.getElementById(tempname).innerHTML = temp;
+			var slidername = zone.name + '_slider';
+			$('#'+slidername).val(zone.target);
+			$('#'+slidername).slider('refresh');
+			for (j = 0; j < zone.switches.length; j++) {
+				var sw = zone.switches[j];
+				var switchid = sw.name + '_switch';
+				$('#'+switchid).val(sw.state);
+				$('#'+switchid).flipswitch('refresh');
+			}
+		}
+	};
 	populate(window.localStorage.getItem("status"));
 }
 
@@ -157,7 +185,7 @@ function get_zone_html(zone) {
 	var temp = Math.round(zone.temp*10)/10;
 	zonehtml += 	'<div data-role="fieldcontain">' +
 			'<label for="' + tempname + '">Temperatur</label>' +
-			'<p>' + temp + '</p>' +
+			'<p id="' + tempname + '"><label>' + temp + '</label></p>' +
 			'<label for="' + slidername + '">Måltemperatur</label>' +
 			'<input type="range" name="' + slidername + '" id="' + slidername + '" max="30" min="6" value="' + zone.target + '" data-highlight="true" onchange="sliderchange(this)"/>' +
 			'<div>';
@@ -176,9 +204,9 @@ function get_switch_html(sw) {
 				'<label for="' + switchid + '">' + sw.name + '</label>' +
 				'<select name="' + switchid + '" id="' + switchid + '" data-role="flipswitch" value="' + sw.state + '" data-disabled="true">';
 	if (sw.state == "On") {
-		switchhtml += '<option>Off</option><option selected="">On</option>';
+		switchhtml += '<option value="Off">Av</option><option value="On" selected="">På</option>';
 	} else {
-		switchhtml += '<option selected="">Off</option><option>On</option>';
+		switchhtml += '<option value="Off" selected="">Av</option><option value="On">På</option>';
 	}
 	switchhtml +=
 			'</select>' +

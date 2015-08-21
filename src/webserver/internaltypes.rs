@@ -6,5 +6,11 @@ use webserver::webtypes;
 pub enum InternalAction {
 	RequestStatus(Sender<webtypes::Status>),
 	TellstickStatus(telldus_types::Status),
-	SetTemp(webtypes::ZoneTemp)
+	SetTemp(webtypes::ZoneTemp),
+	AddClient(Sender<WebsocketSendAction>)
+}
+
+pub enum WebsocketSendAction {
+	Message(String),
+	Close
 }

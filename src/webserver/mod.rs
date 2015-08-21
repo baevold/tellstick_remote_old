@@ -1,3 +1,9 @@
+mod webtypes;
+mod config;
+mod wshandler;
+mod internaltypes;
+mod statusreceiver;
+
 use std::thread;
 use std::sync::Arc;
 use std::sync::mpsc;
@@ -7,11 +13,6 @@ use common::telldus_types;
 use common::extmsg;
 use std::net::UdpSocket;
 
-mod webtypes;
-mod config;
-mod wshandler;
-mod internaltypes;
-mod statusreceiver;
 
 pub fn main() {
 	println!("Hello from webserver");
@@ -56,6 +57,7 @@ pub fn main() {
 	println!("after mapping read");
 
 	//get initial web status
+	let mut wsclients = Vec::new();
 	let mut webstatus = to_webstatus(&telldus_status, &mapping);
 	loop {
 		let action = rx.recv().unwrap();
@@ -65,14 +67,14 @@ pub fn main() {
 			internaltypes::InternalAction::TellstickStatus(status) => {
 				telldus_status = status;
 				webstatus = to_webstatus(&telldus_status, &mapping);
+				wsclients = update_clients(wsclients, &webstatus);
 				update_switches(&mapping, &telldus_status, &config_main.telldus_client, &config_main.telldus_password);
 			}
 			internaltypes::InternalAction::SetTemp(zonetemp) => {
-        			let mut data = json::encode(&mapping).unwrap();
-				println!("{}", &data);
 				set_new_temp(&mut mapping, zonetemp);
-        			data = json::encode(&mapping).unwrap();
-				println!("{}", data);
+			}
+			internaltypes::InternalAction::AddClient(tx) => {
+				wsclients.push(tx);
 			}
 		};
 	}
@@ -193,3 +195,16 @@ fn switch_device(id: i32, state: extmsg::State, client: &String, password: &Stri
 	socket.send_to(&buf, (ip, port)).unwrap();
 	drop(socket);
 }
+
+fn update_clients(clients: Vec<mpsc::Sender<internaltypes::WebsocketSendAction>>, webstatus: &webtypes::Status) -> Vec<mpsc::Sender<internaltypes::WebsocketSendAction>> {
+	let mut newclients = Vec::new();
+	let status = json::encode(&webstatus).unwrap();
+	for client in clients {
+		match client.send(internaltypes::WebsocketSendAction::Message(status.clone())) {
+			Ok(_) => { newclients.push(client)},
+			Err(_) => {}
+		}
+	}
+	return newclients;
+}
+

@@ -9,7 +9,6 @@ use std::str;
 const RECEIVEBUFFERSIZE: usize = 4096;
 
 pub fn receive_status(config: &Arc<config::Config>, tx: mpsc::Sender<internaltypes::InternalAction>) {
-	//TODO port from config
 	let addr = format!("0.0.0.0:{}", config.status_port);
 	let socket_str = str::from_utf8(addr.as_bytes()).unwrap();
 	let result = UdpSocket::bind(socket_str);

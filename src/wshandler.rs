@@ -11,5 +11,4 @@ extern crate env_logger;
 fn main() {
 	env_logger::init().unwrap();
 	webserver::main();
-	println!("hello");
 }

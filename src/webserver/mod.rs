@@ -15,11 +15,6 @@ use std::net::UdpSocket;
 
 
 pub fn main() {
-	println!("Hello from webserver");
-	let a: webtypes::Action = webtypes::Action::Login;
-	let b: webtypes::Message = webtypes::Message{ hash: "hei".to_string(), action: a };
-	let jstring = json::encode(&b).unwrap();
-	println!("{}", jstring);
 	let config = config::read_config().unwrap();
 	let config_arc = Arc::new(config);
 	//config::write_config();
@@ -54,7 +49,6 @@ pub fn main() {
 	//read mapping
 	config::write_mapping();
 	let mut mapping = config::read_mapping().unwrap();
-	println!("after mapping read");
 
 	//get initial web status
 	let mut wsclients = Vec::new();
@@ -72,6 +66,7 @@ pub fn main() {
 			}
 			internaltypes::InternalAction::SetTemp(zonetemp) => {
 				set_new_temp(&mut mapping, zonetemp);
+				//update_switches(&mapping, &telldus_status, &config_main.telldus_client, &config_main.telldus_password);
 			}
 			internaltypes::InternalAction::AddClient(tx) => {
 				wsclients.push(tx);
@@ -149,6 +144,7 @@ fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, cl
 		}
 		return None;
 	}
+	let mut switch_list = Vec::new();
 	let zones = mapping.zones.clone();
 	for zone in zones {
 		let sensor = match get_sensor_by_id(zone.id, &status.sensors) {
@@ -163,7 +159,10 @@ fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, cl
 					None => { error!("Could not get device with id={}", switch.id); return; }
 				};
 				match switch.state {
-					extmsg::State::Off => switch_device(switch.id, extmsg::State::On, &client, &password),
+					extmsg::State::Off => {
+						let sd = extmsg::SwitchData { id: switch.id, state: extmsg::State::On };
+						switch_list.push(sd);
+					},
 					extmsg::State::On => ()
 				}
 			}
@@ -174,23 +173,25 @@ fn update_switches(mapping: &config::Mapping, status: &telldus_types::Status, cl
 				let switch = get_device_by_id(switch.id, &status.devices).unwrap();
 				match switch.state {
 					extmsg::State::Off => (),
-					extmsg::State::On => switch_device(switch.id, extmsg::State::Off, &client, &password),
+					extmsg::State::On => {
+						let sd = extmsg::SwitchData { id: switch.id, state: extmsg::State::Off };
+						switch_list.push(sd);
+					}
 				}
 			}
 		}
 	}
+	switch_devices(switch_list, client, password);
 }
 
-fn switch_device(id: i32, state: extmsg::State, client: &String, password: &String) {
-	println!("Switching device {}", id);
-	let switchdata = extmsg::SwitchData { id: id, state: state };
-	let msg = extmsg::Message { password: password.clone(), action: extmsg::Action::Switch(switchdata) };
+fn switch_devices(swlist: Vec<extmsg::SwitchData>, client: &String, password: &String) {
+	if swlist.len() == 0 { return; }
+	let msg = extmsg::Message { password: password.clone(), action: extmsg::Action::Switch(swlist) };
 	let vec = client.split(":").collect::<Vec<&str>>();
 	let ip = vec[0];
 	let port = String::from(vec[1]).parse::<u16>().unwrap();
 	let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
 	let data: String = json::encode(&msg).unwrap();
-	println!("Sending {}", data);
 	let buf = data.into_bytes();
 	socket.send_to(&buf, (ip, port)).unwrap();
 	drop(socket);

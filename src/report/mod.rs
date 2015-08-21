@@ -17,22 +17,24 @@ pub fn main() {
 	//extmsg::write_message(); return;
 	
 	let config = config::read_config().unwrap();
+	telldus::init();
 
 	let (tx, rx) = channel();
 	let timertx = tx.clone();
 
 	let recv_handle = receiver::start(config.receiver_port, config.password, tx);
 	let send_handle = sender::start(config.clients, rx);
-	recv_handle.join().unwrap();
-	send_handle.join().unwrap();
-
 	// regular updates are initiated here. a simple timer which notifies the sender
-	thread::spawn(move || {
+	let update_thread = thread::spawn(move || {
 		loop {
 			timertx.send(internaltypes::SenderAction::Update).unwrap();
 			thread::sleep_ms(5000 as u32);
 		}
 	});
+	recv_handle.join().unwrap();
+	send_handle.join().unwrap();
+	update_thread.join().unwrap();
+	telldus::close();
 }
 
 #[test]

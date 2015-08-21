@@ -11,6 +11,7 @@ pub fn start(clients: Vec<String>, channel_receiver: Receiver<SenderAction>) -> 
 }
 
 fn start_sender(clients: Vec<String>, channel_receiver: Receiver<SenderAction>) {
+	telldus::init();
 	let mut clients = clients.clone();
 	loop {
 		let action = channel_receiver.recv().unwrap();
@@ -21,7 +22,7 @@ fn start_sender(clients: Vec<String>, channel_receiver: Receiver<SenderAction>) 
 			}
 		}
 		for client in clients.clone() {
-			send_status(get_status(), client);
+			send_status(telldus::get_status(), client);
 		}
 	}
 }
@@ -35,20 +36,12 @@ fn update_clients(clients: &mut Vec<String>, newclient: String) -> Vec<String> {
 	}
 }
 
-fn get_status() -> telldus_types::Status {
-	telldus::init();
-	let status = telldus::get_status();
-	telldus::close();
-	return status;
-}
-
 fn send_status(status: telldus_types::Status, client: String) {
 	let vec = client.split(":").collect::<Vec<&str>>();
 	let ip = vec[0];
 	let port = String::from(vec[1]).parse::<u16>().unwrap();
 	let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
 	let data: String = json::encode(&status).unwrap();
-	println!("Sending {}", data);
 	let buf = data.into_bytes();
 	socket.send_to(&buf, (ip, port)).unwrap();
 	drop(socket);

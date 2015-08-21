@@ -27,7 +27,7 @@ pub struct SwitchData {
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum Action {
 	Register,
-	Switch(SwitchData)
+	Switch(Vec<SwitchData>)
 }
 
 #[derive(RustcEncodable, RustcDecodable)]
@@ -45,9 +45,12 @@ impl Message {
 
 #[allow(dead_code)]
 pub fn write_message() {
+	let mut sdl = Vec::new();
+	let sd = SwitchData { id: 1, state: State::On };
+	sdl.push(sd);
 	let m = Message {
 			password: String::from("pwd"),
-			action: Action::Switch(SwitchData { id: 1, state: State::On }),
+			action: Action::Switch(sdl), 
 	};
 	let data: String = json::encode(&m).unwrap();
         println!("use echo '[data]' > jq . to prettyfi. Remember to quites!");

@@ -39,15 +39,16 @@ fn start_receiver(port: u16, password: String, channel_sender: Sender<SenderActi
 		};
 		//validate checksum before accepting the client
 		if str::from_utf8(received_str.as_bytes()).unwrap() == str::from_utf8(password.as_bytes()).unwrap() {
-			//println!("Password doesnt match");
 			//checksum is invalid. silently disregard it
 			continue;
 		}
 		match msg.action {
 			extmsg::Action::Register => channel_sender.send(SenderAction::Register(addr.to_string())).unwrap(),
-			extmsg::Action::Switch(d) => {
-				switch(d);
-				channel_sender.send(SenderAction::Update);
+			extmsg::Action::Switch(sdl) => {
+				for sd in sdl {
+					switch(sd);
+				}
+				channel_sender.send(SenderAction::Update).unwrap();
 			}
 		}
 		

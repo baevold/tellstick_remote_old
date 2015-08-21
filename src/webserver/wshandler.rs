@@ -21,11 +21,6 @@ enum MessageResponse {
 }
 
 pub fn handle_client_connections(config: &Arc<config::Config>, tx: mpsc::Sender<InternalAction>) {
-	let zt = webtypes::ZoneTemp { name: "hei".to_string(), temp: 1.0 };
-	let st = webtypes::Action::SetTemp(zt);
-	let sa = webtypes::Message{hash: "hash".to_string(), action: st };
-	let stjson = json::encode(&sa).unwrap();
-	println!("{}", stjson);
 	let localaddr = format!("{}:{}", LOCALADDR, config.websocket_port);
 	let server = Server::bind(str::from_utf8(localaddr.as_bytes()).unwrap()).unwrap();
 	for connection in server {
@@ -117,7 +112,6 @@ fn handle_message(msg: String, hash: &String, tx: &mpsc::Sender<InternalAction>)
 			return MessageResponse::None;
 		}
 		webtypes::Action::SetTemp(zonetemp) => {
-			println!("Setting new temp for {} to {}", zonetemp.name, zonetemp.temp);
 			tx.send(InternalAction::SetTemp(zonetemp)).unwrap();
 			return MessageResponse::None;
 		}
@@ -129,7 +123,6 @@ fn sender_thread(sender: &mut sender::Sender<WebSocketStream>, rx: &mpsc::Receiv
 		let action = rx.recv().unwrap();
 		match action {
 			WebsocketSendAction::Message(text) => {
-				println!("Sending {} to client", text);
 				sender.send_message(Message::Text(text)).unwrap();
 			},
 			WebsocketSendAction::Close => { break; }

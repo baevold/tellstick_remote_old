@@ -8,6 +8,7 @@ mod internaltypes;
 
 use std::sync::mpsc::channel;
 use std::thread;
+use common::extmsg;
 
 #[allow(dead_code)]
 pub fn main() {

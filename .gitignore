@@ -3,3 +3,4 @@ Cargo.lock
 rpi_dependencies
 lib
 releases
+cnf/lastMapping.json

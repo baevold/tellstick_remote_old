@@ -8,6 +8,8 @@ mod internaltypes;
 
 use std::sync::mpsc::channel;
 use std::thread;
+
+#[allow(unused_imports)]
 use common::extmsg;
 
 #[allow(dead_code)]

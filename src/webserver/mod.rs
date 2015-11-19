@@ -47,7 +47,7 @@ pub fn main() {
 	let mut telldus_status = telldus_types::Status{sensors: sensors, devices: devices};
 	
 	//read mapping
-	config::write_mapping();
+	//config::write_mapping_test();
 	let mut mapping = config::read_mapping().unwrap();
 
 	//get initial web status
@@ -66,13 +66,17 @@ pub fn main() {
 			}
 			internaltypes::InternalAction::SetTemp(zonetemp) => {
 				set_new_temp(&mut mapping, zonetemp);
-				//update_switches(&mapping, &telldus_status, &config_main.telldus_client, &config_main.telldus_password);
+				save_mapping(&mapping);
 			}
 			internaltypes::InternalAction::AddClient(tx) => {
 				wsclients.push(tx);
 			}
 		};
 	}
+}
+
+fn save_mapping(mapping: &config::Mapping) {
+	config::write_mapping(mapping, &String::from("cnf/lastMapping.json"));
 }
 
 fn to_webstatus(status: &telldus_types::Status, mapping: &config::Mapping) -> webtypes::Status {

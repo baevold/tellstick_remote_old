@@ -3,7 +3,8 @@ use std::io::prelude::*;
 use rustc_serialize::json::{self};
 
 static CONFIGFILE: &'static str = "cnf/webserver.json";
-static MAPPINGFILE: &'static str = "cnf/mapping.json";
+static DEFAULTMAPPINGFILE: &'static str = "cnf/mapping.json";
+static LASTMAPPINGFILE: &'static str = "cnf/lastMapping.json";
 
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Config {
@@ -44,9 +45,12 @@ pub struct Mapping {
 }
 
 pub fn read_mapping() -> Option<Mapping> {
-        let mut file = match File::open(MAPPINGFILE) {
-                Ok(file) => file,
-                Err(_) => panic!("no such file")
+	let mut file = match File::open(LASTMAPPINGFILE) {
+		Ok(file) => file,
+		Err(_) => match File::open(DEFAULTMAPPINGFILE) {
+                	Ok(file) => file,
+                	Err(_) => panic!("no such file")
+		}
         };
         let mut json = String::new();
         match file.read_to_string(&mut json) {
@@ -56,8 +60,20 @@ pub fn read_mapping() -> Option<Mapping> {
         return Some(json::decode(&json).unwrap());
 }
 
+pub fn write_mapping(mapping: &Mapping, filename: &String) {
+        let data: String = json::encode(&mapping).unwrap();
+	let mut file = match File::create(filename) {
+		Ok(file) => file,
+		Err(_) => panic!("Could not create file {}",filename)
+	};
+	match file.write_all(data.as_bytes()) {
+		Ok(_) => println!("Wrote to file!"),
+		Err(_) => panic!("Could not write to file {}", filename)
+	};
+}
+
 #[allow(dead_code)]
-pub fn write_mapping() {
+pub fn write_mapping_test() {
 	let sw1 = Switch{ id: 1, name: "sw1".to_string() };
 	let sw2 = Switch{ id: 2, name: "sw2".to_string() };
 	let mut switches = Vec::new();

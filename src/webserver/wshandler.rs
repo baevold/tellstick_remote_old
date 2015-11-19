@@ -1,5 +1,6 @@
 use websocket::header::WebSocketProtocol;
 use websocket::{Server, Message, Sender, Receiver};
+use websocket::message::Type;
 use websocket::server::sender;
 use websocket::stream::WebSocketStream;
 use std::thread;
@@ -59,16 +60,17 @@ pub fn handle_client_connections(config: &Arc<config::Config>, tx: mpsc::Sender<
 			let senderthread = thread::spawn(move || sender_thread(&mut sender, &mtrx));
 
 			for message in receiver.incoming_messages() {
-				let message = message.unwrap();
+				let message: Message = message.unwrap();
 
-				match message {
-					Message::Close(_) => {
+				match message.opcode {
+					Type::Close => {
 						println!("Client {} disconnected", ip);
 						mttx.send(WebsocketSendAction::Close).unwrap();
 						senderthread.join().unwrap();
 						return;
 					}
-					Message::Text(msg) => {
+					Type::Text => {
+						let msg = str::from_utf8(&*message.payload).unwrap().to_owned();
 						match handle_message(msg, hash, &tx) {
 							MessageResponse::Response(text) => { mttx.send(WebsocketSendAction::Message(text)).unwrap(); },
 							MessageResponse::LoggedIn(text) => {
@@ -123,7 +125,7 @@ fn sender_thread(sender: &mut sender::Sender<WebSocketStream>, rx: &mpsc::Receiv
 		let action = rx.recv().unwrap();
 		match action {
 			WebsocketSendAction::Message(text) => {
-				sender.send_message(Message::Text(text)).unwrap();
+				sender.send_message(&Message::text(text)).unwrap();
 			},
 			WebsocketSendAction::Close => { break; }
 		}

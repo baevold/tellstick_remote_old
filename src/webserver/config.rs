@@ -60,15 +60,15 @@ pub fn read_mapping() -> Option<Mapping> {
         return Some(json::decode(&json).unwrap());
 }
 
-pub fn write_mapping(mapping: &Mapping, filename: &String) {
+pub fn write_mapping(mapping: &Mapping) {
         let data: String = json::encode(&mapping).unwrap();
-	let mut file = match File::create(filename) {
+	let mut file = match File::create(LASTMAPPINGFILE) {
 		Ok(file) => file,
-		Err(_) => panic!("Could not create file {}",filename)
+		Err(_) => panic!("Could not create file {}",LASTMAPPINGFILE)
 	};
 	match file.write_all(data.as_bytes()) {
 		Ok(_) => println!("Wrote to file!"),
-		Err(_) => panic!("Could not write to file {}", filename)
+		Err(_) => panic!("Could not write to file {}", LASTMAPPINGFILE)
 	};
 }
 

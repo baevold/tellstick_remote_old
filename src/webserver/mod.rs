@@ -37,32 +37,22 @@ pub fn main() {
 	let config_main = config_arc.clone();
 
 	//let this thread handle interthread communication and matching between telldus status and web status
-	//init a telldus status
-	let sensor = telldus_types::Sensor{ id: 1, protocol: "dummy".to_string(), model: "dummy".to_string(), datatypes: 1, temperature: 10.0, timestamp: 0 };
-	let device = telldus_types::Device{ id: 1, name: "dummyswitch".to_string(), state: extmsg::State::Off };
-	let mut sensors: Vec<telldus_types::Sensor> = Vec::new();
-	sensors.push(sensor);
-	let mut devices: Vec<telldus_types::Device> = Vec::new();
-	devices.push(device);
-	let mut telldus_status = telldus_types::Status{sensors: sensors, devices: devices};
-	
 	//read mapping
 	//config::write_mapping_test();
 	let mut mapping = config::read_mapping().unwrap();
 
 	//get initial web status
 	let mut wsclients = Vec::new();
-	let mut webstatus = to_webstatus(&telldus_status, &mapping);
+	let mut webstatus = webtypes::Status { zones: Vec::new() };
 	loop {
 		let action = rx.recv().unwrap();
 		let wss = webstatus.clone();
 		match action {
 			internaltypes::InternalAction::RequestStatus(tx) => { tx.send(wss).unwrap(); },
 			internaltypes::InternalAction::TellstickStatus(status) => {
-				telldus_status = status;
-				webstatus = to_webstatus(&telldus_status, &mapping);
+				webstatus = to_webstatus(&status, &mapping);
 				wsclients = update_clients(wsclients, &webstatus);
-				update_switches(&mapping, &telldus_status, &config_main.telldus_client, &config_main.telldus_password);
+				update_switches(&mapping, &status, &config_main.telldus_client, &config_main.telldus_password);
 			}
 			internaltypes::InternalAction::SetTemp(zonetemp) => {
 				set_new_temp(&mut mapping, zonetemp);
@@ -76,7 +66,7 @@ pub fn main() {
 }
 
 fn save_mapping(mapping: &config::Mapping) {
-	config::write_mapping(mapping, &String::from("cnf/lastMapping.json"));
+	config::write_mapping(mapping);
 }
 
 fn to_webstatus(status: &telldus_types::Status, mapping: &config::Mapping) -> webtypes::Status {
